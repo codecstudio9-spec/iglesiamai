@@ -1,0 +1,633 @@
+[
+  {
+    "id": "momento",
+    "title": "Un minuto con Dios",
+    "theme": "Calma",
+    "teaching": "Orar es simplemente estar con Dios. No necesitas palabras perfectas: Él ya está aquí. En este minuto vas a respirar, agradecer, entregarle lo que te pesa y escuchar lo que Él te dice hoy.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Respira",
+        "title": "Quédate quieto.",
+        "text": "No necesitas palabras perfectas. Sigue el círculo, respira despacio y reconoce que Él está aquí contigo.",
+        "verse": "Estad quietos, y conoced que yo soy Dios.",
+        "cite": "Salmo 46:10",
+        "voice": "Por un momento, deja todo lo demás a un lado. [1] No necesitas palabras perfectas... Dios ya está aquí, contigo. [1.5] Respira profundo... [3] y suelta el aire, despacio. [2] Él te dice: [0.6] Estad quietos, y conoced que yo soy Dios."
+      },
+      {
+        "type": "plain",
+        "kicker": "Agradece",
+        "title": "Dale gracias.",
+        "text": "Piensa en algo de hoy por lo que puedas agradecer, por pequeño que sea. Díselo en tu corazón.",
+        "verse": "Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros en Cristo Jesús.",
+        "cite": "1 Tesalonicenses 5:18",
+        "voice": "Ahora, piensa en algo de hoy por lo que puedas dar gracias. [1.5] Puede ser algo pequeño: [0.5] una persona, un abrazo, un nuevo día. [1.5] Díselo en tu corazón... [1] Él te escucha. [2] Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros, en Cristo Jesús."
+      },
+      {
+        "type": "write",
+        "kicker": "Entrega",
+        "title": "Suelta tu carga.",
+        "text": "Escribe lo que te pesa. Nadie más lo verá: no lo guardamos. Es solo entre tú y Dios.",
+        "placeholder": "Señor, hoy te entrego…",
+        "release": "Entregárselo a Dios",
+        "released": "Ya está en Sus manos.",
+        "verse": "Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.",
+        "cite": "1 Pedro 5:7",
+        "voice": "¿Qué es lo que te pesa hoy? [1.5] Puedes escribirlo, o simplemente nombrarlo en silencio. [1.2] No tienes que cargarlo solo. [2] Echando toda vuestra ansiedad sobre él, [0.4] porque él tiene cuidado de vosotros. [1.5] Suéltalo... [1] ya está en Sus manos."
+      },
+      {
+        "type": "word",
+        "kicker": "Escucha",
+        "title": "Él te habla.",
+        "voice": "Ahora, quédate en silencio un momento. [1.5] Lee despacio lo que Dios te dice hoy... [1] y recíbelo como una palabra, solo para ti."
+      }
+    ]
+  },
+  {
+    "id": "rendicion",
+    "title": "Rinde tu corazón",
+    "theme": "Rendición",
+    "teaching": "Dios no busca palabras bonitas ni apariencias: busca tu corazón. Rendirse no es perder, es confiar. Es decirle con sinceridad: “Señor, mi vida es tuya; que se haga tu voluntad y no la mía”.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Ven como estás",
+        "title": "Él te está buscando.",
+        "text": "No tienes que arreglarte para venir. Respira, aquieta tu mente y acércate tal como eres.",
+        "verse": "Me buscaréis y me hallaréis, porque me buscaréis de todo vuestro corazón.",
+        "cite": "Jeremías 29:13",
+        "voice": "Dios no está buscando palabras bonitas... [0.8] está buscando tu corazón. [1.5] No tienes que arreglarte para venir a Él. [1] Ven tal como estás. [1.5] Respira profundo... [2.5] y suelta el aire, despacio. [1.5] Él promete: [0.5] Me buscaréis y me hallaréis, porque me buscaréis de todo vuestro corazón."
+      },
+      {
+        "type": "plain",
+        "kicker": "Examina",
+        "title": "Pídele que te muestre.",
+        "text": "Pídele al Espíritu Santo que te muestre qué hay en tu corazón: lo que te aleja de Él, lo que sostienes con fuerza.",
+        "verse": "Examíname, oh Dios, y conoce mi corazón; pruébame y conoce mis pensamientos.",
+        "cite": "Salmo 139:23",
+        "voice": "Ahora, en silencio, pídele a Dios que examine tu corazón. [1.5] Que te muestre aquello que te aleja de Él... [1] aquello que sostienes con fuerza, y no quieres soltar. [2] Puedes orar así: [0.6] Examíname, oh Dios, y conoce mi corazón; [0.5] pruébame, y conoce mis pensamientos."
+      },
+      {
+        "type": "write",
+        "kicker": "Ríndete",
+        "title": "Suelta el control.",
+        "text": "Escribe aquello que has querido controlar tú solo: un plan, una relación, tu futuro. Solo tú y Dios lo verán.",
+        "placeholder": "Señor, te rindo…",
+        "release": "Rendírselo a Dios",
+        "released": "Que se haga tu voluntad.",
+        "verse": "No se haga mi voluntad, sino la tuya.",
+        "cite": "Lucas 22:42",
+        "voice": "¿Qué has querido controlar tú solo? [1.5] Un plan, una relación, tu futuro... [1.5] Jesús mismo nos enseñó a orar con un corazón rendido, cuando dijo: [0.6] No se haga mi voluntad, sino la tuya. [2] Entrégaselo ahora. [1] No lo estás perdiendo... [0.8] lo estás poniendo en las mejores manos."
+      },
+      {
+        "type": "plain",
+        "kicker": "Dale tu corazón",
+        "title": "Aquí está mi corazón.",
+        "text": "Repite en voz baja: “Señor, aquí está mi corazón. Es tuyo. Hazme conforme a tu voluntad”.",
+        "verse": "Dame, hijo mío, tu corazón, y miren tus ojos por mis caminos.",
+        "cite": "Proverbios 23:26",
+        "voice": "Escucha lo que Dios te dice: [0.6] Dame, hijo mío, tu corazón, y miren tus ojos por mis caminos. [2] Repite conmigo, despacio: [1] Señor... aquí está mi corazón. [1.5] Es tuyo. [1.5] Hazme conforme a tu voluntad. [2] Él recibe tu corazón con amor."
+      }
+    ]
+  },
+  {
+    "id": "arrepentimiento",
+    "title": "Vuelve a casa",
+    "theme": "Arrepentimiento",
+    "teaching": "Arrepentirse no es castigarte: es volver al Padre. Confesar con sinceridad, recibir su perdón y dar la vuelta. Dios no rechaza a un corazón humilde; corre a abrazarlo.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Acércate",
+        "title": "Sin miedo.",
+        "text": "No te acercas a un juez lejano, sino a un Padre lleno de gracia. Respira y ven con confianza.",
+        "verse": "Acerquémonos, pues, confiadamente al trono de la gracia, para alcanzar misericordia.",
+        "cite": "Hebreos 4:16",
+        "voice": "Tal vez sientes que te has alejado... [1] o que le has fallado a Dios. [1.5] Pero no te acercas a un juez lejano: [0.6] te acercas a un Padre lleno de gracia. [1.5] Respira profundo... [2.5] y ven con confianza. [1.5] Acerquémonos, pues, confiadamente al trono de la gracia, para alcanzar misericordia."
+      },
+      {
+        "type": "write",
+        "kicker": "Confiesa",
+        "title": "Díselo con sinceridad.",
+        "text": "Escribe aquello en lo que le has fallado. No lo guardamos: es una conversación honesta con Dios.",
+        "placeholder": "Padre, perdóname por…",
+        "release": "Confesárselo a Dios",
+        "released": "Él es fiel para perdonarte.",
+        "verse": "Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad.",
+        "cite": "1 Juan 1:9",
+        "voice": "Ahora, con sinceridad, dile a Dios aquello en lo que le has fallado. [1.5] No necesitas esconder nada... [1] Él ya lo conoce, y aun así te ama. [2] Esta es su promesa: [0.6] Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad."
+      },
+      {
+        "type": "plain",
+        "kicker": "Recibe",
+        "title": "Estás perdonado.",
+        "text": "Por lo que Jesús hizo en la cruz, su perdón es real. Pídele un corazón limpio y recíbelo.",
+        "verse": "Crea en mí, oh Dios, un corazón limpio, y renueva un espíritu recto dentro de mí.",
+        "cite": "Salmo 51:10",
+        "voice": "Por lo que Jesús hizo en la cruz, [0.5] su perdón es real. [1.5] No tienes que seguir cargando la culpa. [1.5] Ora como oró David: [0.6] Crea en mí, oh Dios, un corazón limpio, [0.5] y renueva un espíritu recto dentro de mí. [2] Recíbelo... [1] estás perdonado."
+      },
+      {
+        "type": "plain",
+        "kicker": "Da la vuelta",
+        "title": "Un paso de obediencia.",
+        "text": "Arrepentirse es cambiar de dirección. Piensa en un paso concreto que darás hoy para caminar con Él.",
+        "verse": "Arrepentíos y convertíos, para que sean borrados vuestros pecados; para que vengan de la presencia del Señor tiempos de refrigerio.",
+        "cite": "Hechos 3:19",
+        "voice": "Arrepentirse es dar la vuelta... [1] volver a casa. [1.5] Piensa en un paso concreto que darás hoy para caminar con Dios. [2] Y escucha esta promesa: [0.6] Arrepentíos y convertíos, para que sean borrados vuestros pecados; [0.5] para que vengan de la presencia del Señor tiempos de refrigerio."
+      }
+    ]
+  },
+  {
+    "id": "gratitud",
+    "title": "Entra con gratitud",
+    "theme": "Gratitud y adoración",
+    "teaching": "Antes de pedir, la Biblia nos enseña a agradecer y adorar. La gratitud cambia nuestra mirada: deja de estar en el problema y se pone en Dios, en quién es Él y en todo lo que ha hecho.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Entra",
+        "title": "Por sus puertas.",
+        "text": "Respira y entra a su presencia con un corazón agradecido.",
+        "verse": "Entrad por sus puertas con acción de gracias, por sus atrios con alabanza; alabadle, bendecid su nombre.",
+        "cite": "Salmo 100:4",
+        "voice": "La Biblia nos enseña cómo entrar a la presencia de Dios: [0.6] con gratitud. [1.5] Respira profundo... [2.5] y suelta el aire, despacio. [1.5] Entrad por sus puertas con acción de gracias, [0.4] por sus atrios con alabanza; [0.4] alabadle, bendecid su nombre."
+      },
+      {
+        "type": "write",
+        "kicker": "Recuerda",
+        "title": "Cuenta tus bendiciones.",
+        "text": "Escribe tres cosas por las que quieres darle gracias hoy. Grandes o pequeñas, todas vienen de Él.",
+        "placeholder": "Gracias, Señor, por…",
+        "release": "Darle gracias",
+        "released": "Bendito sea su nombre.",
+        "verse": "Bendice, alma mía, a Jehová, y no olvides ninguno de sus beneficios.",
+        "cite": "Salmo 103:2",
+        "voice": "Ahora, recuerda lo que Dios ha hecho por ti. [1.5] Piensa en tres cosas por las que quieres darle gracias hoy... [2] grandes o pequeñas. [1] Todas vienen de Él. [2] Bendice, alma mía, a Jehová, [0.4] y no olvides ninguno de sus beneficios."
+      },
+      {
+        "type": "plain",
+        "kicker": "Adora",
+        "title": "Por quién es Él.",
+        "text": "Ahora no le agradezcas por lo que da, sino adóralo por quién es: fiel, bueno, santo, tu Padre.",
+        "verse": "Gustad, y ved que es bueno Jehová; dichoso el hombre que confía en él.",
+        "cite": "Salmo 34:8",
+        "voice": "Ahora, ve más allá de lo que Él te da... [1] y adóralo por quién es. [1.5] Él es fiel. [1] Él es bueno. [1] Él es santo. [1] Él es tu Padre. [2] Díselo con tus propias palabras. [2] Gustad, y ved que es bueno Jehová; dichoso el hombre que confía en él."
+      },
+      {
+        "type": "word",
+        "kicker": "Escucha",
+        "title": "Él te responde.",
+        "voice": "Cuando adoramos, Dios nos habla. [1.5] Quédate en silencio un momento... [1] y lee despacio lo que Él te dice hoy."
+      }
+    ]
+  },
+  {
+    "id": "descanso",
+    "title": "Descansa en Él",
+    "theme": "Ansiedad y cargas",
+    "teaching": "Dios no quiere que vivas cargado. Orar es cambiar la ansiedad por su paz: le cuentas todo con confianza, le das gracias, y dejas que su paz guarde tu corazón.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Ven",
+        "title": "Él te hará descansar.",
+        "text": "Jesús te invita a ir a Él tal como estás: cansado, cargado, preocupado. Respira despacio.",
+        "verse": "Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.",
+        "cite": "Mateo 11:28",
+        "voice": "Si hoy te sientes cansado o preocupado... [1] Jesús te hace una invitación. [1.5] Respira profundo... [3] y suelta el aire, despacio. [1.5] Él te dice: [0.6] Venid a mí todos los que estáis trabajados y cargados, [0.4] y yo os haré descansar."
+      },
+      {
+        "type": "write",
+        "kicker": "Cuéntale",
+        "title": "¿Qué te preocupa?",
+        "text": "Escribe lo que te quita la paz. Nadie más lo verá. Díselo con confianza: a Él le importa.",
+        "placeholder": "Señor, me preocupa…",
+        "release": "Entregárselo a Dios",
+        "released": "Él tiene cuidado de ti.",
+        "verse": "Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.",
+        "cite": "1 Pedro 5:7",
+        "voice": "¿Qué es lo que te quita la paz? [1.5] Díselo a Dios con confianza... [1] a Él le importa cada detalle de tu vida. [2] Echando toda vuestra ansiedad sobre él, [0.4] porque él tiene cuidado de vosotros."
+      },
+      {
+        "type": "plain",
+        "kicker": "Pide con gratitud",
+        "title": "En toda oración.",
+        "text": "Preséntale tus peticiones, pero hazlo dándole gracias: Él ya está obrando aunque no lo veas.",
+        "verse": "Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.",
+        "cite": "Filipenses 4:6",
+        "voice": "La Biblia nos enseña cómo orar cuando estamos ansiosos: [0.6] presentando nuestras peticiones... [0.5] con gratitud. [1.5] Por nada estéis afanosos, [0.4] sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias. [2] Dale gracias ahora, porque Él ya está obrando... aunque no lo veas."
+      },
+      {
+        "type": "breath",
+        "kicker": "Recibe su paz",
+        "title": "Paz que guarda.",
+        "text": "Respira y recibe su paz. No depende de que todo esté resuelto: depende de que Él está contigo.",
+        "verse": "Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.",
+        "cite": "Filipenses 4:7",
+        "voice": "Ahora, respira... [2.5] y recibe su paz. [1.5] No depende de que todo esté resuelto... [1] depende de que Él está contigo. [2] Y la paz de Dios, que sobrepasa todo entendimiento, [0.4] guardará vuestros corazones y vuestros pensamientos en Cristo Jesús."
+      }
+    ]
+  },
+  {
+    "id": "perdonar",
+    "title": "Perdona y sé libre",
+    "theme": "Perdón",
+    "teaching": "Perdonar no es decir que lo que pasó estuvo bien, ni esperar a sentir ganas. Es una decisión de obediencia: soltar la deuda porque Dios nos perdonó primero. Y el primero en quedar libre eres tú.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Recuerda",
+        "title": "Tú fuiste perdonado.",
+        "text": "Antes de perdonar, recuerda cuánto te ha perdonado Dios. Respira y recibe su misericordia.",
+        "verse": "Sed benignos unos con otros, misericordiosos, perdonándoos unos a otros, como Dios también os perdonó a vosotros en Cristo.",
+        "cite": "Efesios 4:32",
+        "voice": "Antes de perdonar a otros, recuerda cuánto te ha perdonado Dios a ti. [1.5] Respira profundo... [2.5] y recibe su misericordia. [1.5] Sed benignos unos con otros, misericordiosos, [0.4] perdonándoos unos a otros, como Dios también os perdonó a vosotros en Cristo."
+      },
+      {
+        "type": "plain",
+        "kicker": "Reconoce",
+        "title": "¿A quién necesitas perdonar?",
+        "text": "Pídele a Dios que traiga a tu mente a esa persona. No tienes que sentirlo todavía; solo ser sincero.",
+        "verse": "Porque si perdonáis a los hombres sus ofensas, os perdonará también a vosotros vuestro Padre celestial.",
+        "cite": "Mateo 6:14",
+        "voice": "Pídele a Dios que traiga a tu mente a alguien a quien necesitas perdonar. [2] Tal vez te duele recordarlo... [1] está bien. [1.5] No tienes que sentir ganas de perdonar. [1] Perdonar es una decisión de obediencia. [2] Jesús dijo: [0.5] Si perdonáis a los hombres sus ofensas, os perdonará también a vosotros vuestro Padre celestial."
+      },
+      {
+        "type": "write",
+        "kicker": "Suelta",
+        "title": "Decide perdonar.",
+        "text": "Escribe su nombre y lo que te hizo. Luego suéltalo en las manos de Dios. No lo guardamos.",
+        "placeholder": "Señor, decido perdonar a…",
+        "release": "Lo perdono, Señor",
+        "released": "Eres libre.",
+        "verse": "De la manera que Cristo os perdonó, así también hacedlo vosotros.",
+        "cite": "Colosenses 3:13",
+        "voice": "Ahora, dile a Dios el nombre de esa persona... [1] y lo que te hizo. [2] Y luego, decide soltarlo. [1] Puedes decir: [0.6] Señor, decido perdonar. [1] Suelto esta deuda en tus manos. [2] De la manera que Cristo os perdonó, así también hacedlo vosotros."
+      },
+      {
+        "type": "plain",
+        "kicker": "Bendice",
+        "title": "Ora por esa persona.",
+        "text": "El último paso del perdón es bendecir. Pide a Dios que obre en la vida de esa persona.",
+        "verse": "Amad a vuestros enemigos, bendecid a los que os maldicen, haced bien a los que os aborrecen, y orad por los que os ultrajan.",
+        "cite": "Mateo 5:44",
+        "voice": "Jesús nos enseña algo difícil, pero liberador: [0.6] bendecir a quien nos hirió. [1.5] Pídele a Dios que obre en la vida de esa persona. [2] Amad a vuestros enemigos, [0.4] bendecid a los que os maldicen, [0.4] y orad por los que os ultrajan. [2] Al bendecir, tu corazón empieza a sanar."
+      }
+    ]
+  },
+  {
+    "id": "obediencia",
+    "title": "Habla, Señor",
+    "theme": "Obediencia",
+    "teaching": "Orar no es solo hablarle a Dios: también es escucharlo y obedecer. Jesús dijo que si le amamos, guardaremos sus palabras. Un corazón rendido no solo oye; hace lo que Él dice.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Dispón tu corazón",
+        "title": "Tu siervo oye.",
+        "text": "Como Samuel, ven dispuesto a escuchar. Respira y dile: “Habla, Señor, que tu siervo oye”.",
+        "verse": "Habla, porque tu siervo oye.",
+        "cite": "1 Samuel 3:10",
+        "voice": "Cuando Dios llamó al joven Samuel, él respondió con un corazón dispuesto. [1.5] Respira profundo... [2.5] y prepara tu corazón para escuchar. [1.5] Dile a Dios, como Samuel: [0.6] Habla, Señor... porque tu siervo oye."
+      },
+      {
+        "type": "word",
+        "kicker": "Escucha",
+        "title": "Su Palabra para ti.",
+        "voice": "Dios habla, sobre todo, por medio de su Palabra. [1.5] Lee despacio lo que Él te dice hoy... [1] y pregúntale: [0.5] Señor, ¿qué quieres que haga con esto?"
+      },
+      {
+        "type": "plain",
+        "kicker": "Reflexiona",
+        "title": "¿Qué te está pidiendo?",
+        "text": "Quizás es perdonar, buscar a alguien, dejar algo o empezar algo. Piensa en un paso concreto.",
+        "verse": "Sed hacedores de la palabra, y no tan solamente oidores, engañándoos a vosotros mismos.",
+        "cite": "Santiago 1:22",
+        "voice": "¿Qué te está pidiendo Dios? [1.5] Quizás es perdonar... [0.8] buscar a alguien... [0.8] dejar algo... o empezar algo nuevo. [2] Piensa en un paso concreto. [1.5] Sed hacedores de la palabra, [0.4] y no tan solamente oidores."
+      },
+      {
+        "type": "plain",
+        "kicker": "Dile sí",
+        "title": "Por amor, obedezco.",
+        "text": "Obedecer es la forma de amarlo. Dile: “Señor, te digo que sí. Dame la fuerza para hacerlo”.",
+        "verse": "Si me amáis, guardad mis mandamientos.",
+        "cite": "Juan 14:15",
+        "voice": "Obedecer no es una carga: [0.5] es nuestra forma de amar a Dios. [1.5] Jesús dijo: [0.5] Si me amáis, guardad mis mandamientos. [2] Dile ahora, con todo tu corazón: [1] Señor... te digo que sí. [1.5] Dame la fuerza para obedecerte."
+      }
+    ]
+  },
+  {
+    "id": "padre-nuestro",
+    "title": "Ora como Jesús enseñó",
+    "theme": "El Padre Nuestro",
+    "teaching": "Cuando los discípulos le pidieron a Jesús “enséñanos a orar”, Él les dio un modelo. No es para repetirlo sin pensar, sino para aprender el orden del corazón: honrar a Dios, rendirse a su voluntad, depender, perdonar y confiar.",
+    "steps": [
+      {
+        "type": "plain",
+        "kicker": "Honra",
+        "title": "Padre nuestro.",
+        "text": "Empieza reconociendo quién es Él: tu Padre, santo y digno. Antes de pedir, adóralo.",
+        "verse": "Padre nuestro que estás en los cielos, santificado sea tu nombre.",
+        "cite": "Mateo 6:9",
+        "voice": "Jesús nos enseñó a empezar la oración llamando a Dios: [0.5] Padre. [1.5] No eres un extraño... eres su hijo. [1.5] Ora conmigo: [0.8] Padre nuestro que estás en los cielos, [0.6] santificado sea tu nombre. [2] Dile con tus palabras lo que Él es para ti."
+      },
+      {
+        "type": "plain",
+        "kicker": "Ríndete",
+        "title": "Hágase tu voluntad.",
+        "text": "Pon sus planes por encima de los tuyos. Pide que su reino llegue a tu casa, a tu trabajo, a tu corazón.",
+        "verse": "Venga tu reino. Hágase tu voluntad, como en el cielo, así también en la tierra.",
+        "cite": "Mateo 6:10",
+        "voice": "Ahora, rinde tus planes a los suyos. [1.5] Venga tu reino. [1] Hágase tu voluntad, [0.4] como en el cielo, así también en la tierra. [2] Pide que su reino llegue a tu casa... [0.8] a tu trabajo... [0.8] y a tu corazón."
+      },
+      {
+        "type": "plain",
+        "kicker": "Depende y perdona",
+        "title": "Danos hoy.",
+        "text": "Pídele lo que necesitas para hoy, y perdona como Él te perdona. Dependencia y perdón van juntos.",
+        "verse": "El pan nuestro de cada día, dánoslo hoy. Y perdónanos nuestras deudas, como también nosotros perdonamos a nuestros deudores.",
+        "cite": "Mateo 6:11-12",
+        "voice": "Dios quiere que dependas de Él cada día. [1.5] Pídele lo que necesitas para hoy. [2] El pan nuestro de cada día, dánoslo hoy. [1.5] Y perdónanos nuestras deudas, [0.4] como también nosotros perdonamos a nuestros deudores. [2] Si hay alguien a quien perdonar, este es el momento."
+      },
+      {
+        "type": "plain",
+        "kicker": "Confía",
+        "title": "Tuyo es el reino.",
+        "text": "Pide su protección y termina devolviéndole toda la gloria. La oración empieza y termina en Él.",
+        "verse": "No nos metas en tentación, mas líbranos del mal; porque tuyo es el reino, y el poder, y la gloria, por todos los siglos. Amén.",
+        "cite": "Mateo 6:13",
+        "voice": "Pide su protección para ti y para los tuyos. [1.5] Y no nos metas en tentación, [0.4] mas líbranos del mal; [1] porque tuyo es el reino, y el poder, y la gloria, [0.4] por todos los siglos. [1.5] Amén. [1.5] La oración empieza y termina en Él."
+      }
+    ]
+  },
+  {
+    "id": "intercesion",
+    "title": "Ora por otros",
+    "theme": "Intercesión",
+    "teaching": "Orar por otros es amar como Jesús ama. Cuando intercedes, pones a las personas delante de Dios y te unes a lo que Él quiere hacer en sus vidas. Tu oración tiene poder.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Prepárate",
+        "title": "Un corazón que ama.",
+        "text": "Respira y pídele a Dios que te dé su amor por las personas que vas a presentarle.",
+        "verse": "Exhorto ante todo, a que se hagan rogativas, oraciones, peticiones y acciones de gracias, por todos los hombres.",
+        "cite": "1 Timoteo 2:1",
+        "voice": "Hoy vas a orar por otros. [1.5] Respira profundo... [2.5] y pídele a Dios que te dé su amor por las personas que vas a presentarle. [2] Exhorto ante todo, a que se hagan rogativas, oraciones, peticiones y acciones de gracias, [0.4] por todos los hombres."
+      },
+      {
+        "type": "write",
+        "kicker": "Nómbralos",
+        "title": "¿Por quién quieres orar?",
+        "text": "Escribe los nombres de quienes necesitan a Dios hoy: alguien enfermo, alguien lejos de Él, alguien que sufre.",
+        "placeholder": "Señor, te presento a…",
+        "release": "Presentarlos a Dios",
+        "released": "Están en Sus manos.",
+        "verse": "La oración eficaz del justo puede mucho.",
+        "cite": "Santiago 5:16",
+        "voice": "Piensa en las personas que necesitan a Dios hoy. [1.5] Alguien enfermo... [0.8] alguien que está lejos de Él... [0.8] alguien que sufre. [1.5] Di sus nombres delante de Dios, uno por uno. [2.5] No subestimes tu oración: [0.5] la oración eficaz del justo puede mucho."
+      },
+      {
+        "type": "plain",
+        "kicker": "Tu ciudad",
+        "title": "Ora por Bogotá.",
+        "text": "Ora por tu familia, tu barrio y tu ciudad: por paz, por salvación y por las familias.",
+        "verse": "Procurad la paz de la ciudad, y rogad por ella a Jehová; porque en su paz tendréis vosotros paz.",
+        "cite": "Jeremías 29:7",
+        "voice": "Ahora, amplía tu oración. [1] Ora por tu familia... [1] por tu barrio... [1] y por tu ciudad. [1.5] Pide paz, salvación y restauración para las familias. [2] Procurad la paz de la ciudad, y rogad por ella a Jehová; [0.4] porque en su paz tendréis vosotros paz."
+      },
+      {
+        "type": "plain",
+        "kicker": "Tu iglesia",
+        "title": "Ora por la iglesia.",
+        "text": "Ora por los pastores, los líderes y cada familia de MAI. Que seamos una casa donde Dios habita.",
+        "verse": "Orando en todo tiempo con toda oración y súplica en el Espíritu, y velando en ello con toda perseverancia y súplica por todos los santos.",
+        "cite": "Efesios 6:18",
+        "voice": "Por último, ora por tu iglesia. [1.5] Por los pastores... [0.8] por los líderes... [0.8] y por cada familia de MAI. [1.5] Que seamos una casa donde Dios habita. [2] Orando en todo tiempo con toda oración y súplica en el Espíritu, [0.4] por todos los santos."
+      }
+    ]
+  },
+  {
+    "id": "identidad",
+    "title": "Eres su hijo",
+    "theme": "Identidad",
+    "teaching": "Por medio de Jesús, no te acercas a Dios como un extraño ni como un empleado, sino como un hijo amado. Orar desde esa identidad cambia todo: ya no oras con miedo, sino con confianza.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Escucha tu nombre",
+        "title": "Mío eres tú.",
+        "text": "Dios te conoce por tu nombre. Respira y deja que esta verdad llegue a tu corazón.",
+        "verse": "No temas, porque yo te redimí; te puse nombre, mío eres tú.",
+        "cite": "Isaías 43:1",
+        "voice": "Dios te conoce por tu nombre. [1.5] Respira profundo... [2.5] y deja que esta verdad llegue a tu corazón. [1.5] Él te dice: [0.6] No temas, porque yo te redimí; [0.4] te puse nombre... [0.6] mío eres tú."
+      },
+      {
+        "type": "write",
+        "kicker": "Suelta las mentiras",
+        "title": "¿Qué has creído de ti?",
+        "text": "Escribe lo que te han dicho o te has dicho: “no sirvo”, “no valgo”, “Dios no me quiere”. Entrégaselo.",
+        "placeholder": "He creído que…",
+        "release": "Entregar esa mentira",
+        "released": "No hay condenación para ti.",
+        "verse": "Ahora, pues, ninguna condenación hay para los que están en Cristo Jesús.",
+        "cite": "Romanos 8:1",
+        "voice": "A veces creemos mentiras sobre nosotros mismos: [0.6] no sirvo... [0.8] no valgo... [0.8] Dios no me quiere. [1.5] Entrégale a Dios esas mentiras. [2] Y escucha la verdad: [0.6] Ahora, pues, ninguna condenación hay para los que están en Cristo Jesús."
+      },
+      {
+        "type": "plain",
+        "kicker": "Recibe",
+        "title": "Hijo de Dios.",
+        "text": "Esa es tu verdadera identidad. Dale gracias por haberte hecho su hijo por medio de Jesús.",
+        "verse": "Mas a todos los que le recibieron, a los que creen en su nombre, les dio potestad de ser hechos hijos de Dios.",
+        "cite": "Juan 1:12",
+        "voice": "Esta es tu verdadera identidad. [1.5] Mas a todos los que le recibieron, a los que creen en su nombre, [0.4] les dio potestad de ser hechos hijos de Dios. [2] Dale gracias por haberte hecho su hijo. [1.5] Repite: [0.6] Soy amado. [1] Soy perdonado. [1] Soy hijo de Dios."
+      },
+      {
+        "type": "word",
+        "kicker": "Escucha",
+        "title": "Tu Padre te habla.",
+        "voice": "Como un padre que habla con su hijo... [1] Dios tiene algo que decirte hoy. [1.5] Lee despacio... y recíbelo."
+      }
+    ]
+  },
+  {
+    "id": "silencio",
+    "title": "Escucha su voz",
+    "theme": "Silencio y presencia",
+    "teaching": "Orar no es solo hablar. Muchas veces lo más profundo es quedarnos en silencio delante de Dios, disfrutar su presencia y dejar que Él nos hable. Sus ovejas oyen su voz.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Aquiétate",
+        "title": "Silencio.",
+        "text": "Apaga el ruido por un momento. Respira con el círculo y solo está con Él.",
+        "verse": "Estad quietos, y conoced que yo soy Dios.",
+        "cite": "Salmo 46:10",
+        "voice": "Hoy no vamos a decir muchas palabras. [1.5] Solo vamos a estar con Dios. [1.5] Respira profundo... [3] y suelta el aire, despacio. [2.5] Otra vez... [3] Estad quietos, y conoced que yo soy Dios."
+      },
+      {
+        "type": "breath",
+        "kicker": "Permanece",
+        "title": "Él está aquí.",
+        "text": "No tienes que hacer nada. Solo quédate. Si tu mente se distrae, vuelve suavemente a Él.",
+        "verse": "Mis ovejas oyen mi voz, y yo las conozco, y me siguen.",
+        "cite": "Juan 10:27",
+        "voice": "No tienes que hacer nada... [1] solo quédate. [2] Si tu mente se distrae, [0.5] vuelve suavemente a Él. [3] Jesús dijo: [0.6] Mis ovejas oyen mi voz, y yo las conozco, y me siguen."
+      },
+      {
+        "type": "word",
+        "kicker": "Escucha",
+        "title": "Su voz.",
+        "voice": "Ahora, deja que Él te hable por su Palabra. [1.5] Lee despacio... [1] tal vez una sola frase sea para ti hoy."
+      },
+      {
+        "type": "plain",
+        "kicker": "Responde",
+        "title": "Buscaré tu rostro.",
+        "text": "Respóndele con sencillez. Dile qué despertó en ti su Palabra y que quieres seguir buscándolo.",
+        "verse": "Mi corazón ha dicho de ti: Buscad mi rostro. Tu rostro buscaré, oh Jehová.",
+        "cite": "Salmo 27:8",
+        "voice": "Ahora, respóndele con sencillez. [1.5] Dile qué despertó en ti su Palabra. [2] Y dile que quieres seguir buscándolo. [1.5] Mi corazón ha dicho de ti: [0.4] Buscad mi rostro. [0.8] Tu rostro buscaré, oh Jehová."
+      }
+    ]
+  },
+  {
+    "id": "fortaleza",
+    "title": "Fuerzas nuevas",
+    "theme": "Fortaleza en la prueba",
+    "teaching": "Dios no nos pide ser fuertes por nosotros mismos. En nuestra debilidad, su poder se perfecciona. Orar en la prueba es esperar en Él, apoyarnos en su gracia y permanecer unidos a Jesús.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Espera en Él",
+        "title": "Como las águilas.",
+        "text": "Si te sientes sin fuerzas, respira. Esperar en Dios es confiar en que Él renueva tus fuerzas.",
+        "verse": "Los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán.",
+        "cite": "Isaías 40:31",
+        "voice": "Si hoy te sientes sin fuerzas... [1] este momento es para ti. [1.5] Respira profundo... [2.5] y suelta el aire, despacio. [1.5] Los que esperan a Jehová tendrán nuevas fuerzas; [0.4] levantarán alas como las águilas; [0.4] correrán, y no se cansarán."
+      },
+      {
+        "type": "write",
+        "kicker": "Reconoce",
+        "title": "¿Qué te tiene cansado?",
+        "text": "Escribe la batalla que estás atravesando. No tienes que fingir fortaleza delante de Dios.",
+        "placeholder": "Señor, estoy luchando con…",
+        "release": "Dejarlo en Sus manos",
+        "released": "Bástate mi gracia.",
+        "verse": "Bástate mi gracia; porque mi poder se perfecciona en la debilidad.",
+        "cite": "2 Corintios 12:9",
+        "voice": "No tienes que fingir fortaleza delante de Dios. [1.5] Dile con sinceridad qué batalla estás atravesando. [2] Y escucha lo que Él te responde: [0.6] Bástate mi gracia; [0.4] porque mi poder se perfecciona en la debilidad."
+      },
+      {
+        "type": "plain",
+        "kicker": "Esfuérzate",
+        "title": "No estás solo.",
+        "text": "Dios no te manda a pelear solo. Él va contigo a cada lugar. Recibe valor para hoy.",
+        "verse": "Esfuérzate y sé valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.",
+        "cite": "Josué 1:9",
+        "voice": "Dios no te manda a pelear solo. [1.5] Él va contigo a cada lugar. [1.5] Escucha su voz: [0.6] Esfuérzate y sé valiente; [0.4] no temas ni desmayes, [0.4] porque Jehová tu Dios estará contigo en dondequiera que vayas."
+      },
+      {
+        "type": "plain",
+        "kicker": "Permanece",
+        "title": "Unido a Él.",
+        "text": "La fuerza no viene de ti, sino de estar unido a Jesús. Dile que quieres permanecer en Él.",
+        "verse": "El que permanece en mí, y yo en él, éste lleva mucho fruto; porque separados de mí nada podéis hacer.",
+        "cite": "Juan 15:5",
+        "voice": "La fuerza no viene de ti... [1] viene de estar unido a Jesús. [1.5] Él dijo: [0.5] El que permanece en mí, y yo en él, éste lleva mucho fruto; [0.4] porque separados de mí nada podéis hacer. [2] Dile ahora: [0.6] Señor, quiero permanecer en ti."
+      }
+    ]
+  },
+  {
+    "id": "direccion",
+    "title": "Guía mis pasos",
+    "theme": "Dirección",
+    "teaching": "Buscar la dirección de Dios empieza por confiar en Él más que en nuestro propio entendimiento. Cuando lo reconocemos en todo y rendimos nuestra voluntad, Él endereza el camino.",
+    "steps": [
+      {
+        "type": "breath",
+        "kicker": "Confía",
+        "title": "De todo corazón.",
+        "text": "Respira y suelta la necesidad de tenerlo todo claro. Confía en Él más que en tu propia prudencia.",
+        "verse": "Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.",
+        "cite": "Proverbios 3:5",
+        "voice": "Cuando no sabemos qué camino tomar... [1] Dios nos invita a confiar. [1.5] Respira profundo... [2.5] y suelta la necesidad de tenerlo todo claro. [1.5] Fíate de Jehová de todo tu corazón, [0.4] y no te apoyes en tu propia prudencia."
+      },
+      {
+        "type": "write",
+        "kicker": "Presenta",
+        "title": "¿Qué decisión tienes delante?",
+        "text": "Escribe la decisión o la duda que tienes. Preséntasela a Dios con honestidad.",
+        "placeholder": "Señor, necesito tu dirección en…",
+        "release": "Ponerlo en Sus manos",
+        "released": "Él enderezará tus veredas.",
+        "verse": "Reconócelo en todos tus caminos, y él enderezará tus veredas.",
+        "cite": "Proverbios 3:6",
+        "voice": "¿Qué decisión tienes delante? [1.5] Preséntasela a Dios con honestidad. [2] Reconócelo en todos tus caminos, [0.4] y él enderezará tus veredas."
+      },
+      {
+        "type": "plain",
+        "kicker": "Escucha",
+        "title": "Él te enseñará.",
+        "text": "Dios promete guiarte. Pídele sabiduría y presta atención a su Palabra, a su paz y a consejo sabio.",
+        "verse": "Te haré entender, y te enseñaré el camino en que debes andar; sobre ti fijaré mis ojos.",
+        "cite": "Salmo 32:8",
+        "voice": "Dios promete guiarte. [1.5] Él habla por su Palabra... [0.8] por su paz en tu corazón... [0.8] y por medio de consejo sabio. [2] Escucha su promesa: [0.6] Te haré entender, y te enseñaré el camino en que debes andar; [0.4] sobre ti fijaré mis ojos."
+      },
+      {
+        "type": "plain",
+        "kicker": "Ríndete",
+        "title": "Tu voluntad, no la mía.",
+        "text": "La mejor decisión empieza con un corazón rendido. Dile que estás dispuesto a hacer lo que Él diga.",
+        "verse": "No se haga mi voluntad, sino la tuya.",
+        "cite": "Lucas 22:42",
+        "voice": "La mejor decisión empieza con un corazón rendido. [1.5] Dile a Dios que estás dispuesto a hacer lo que Él diga... [1] aunque no sea lo que esperabas. [2] Ora como Jesús: [0.6] No se haga mi voluntad, sino la tuya."
+      }
+    ]
+  },
+  {
+    "id": "conocer-a-jesus",
+    "title": "Abre tu corazón a Jesús",
+    "theme": "Conocer a Dios",
+    "teaching": "El primer paso para acercarte a Dios es recibir a Jesús. No por religión ni por tus esfuerzos, sino por su amor. Si nunca lo has hecho, o quieres volver a empezar, esta oración es para ti.",
+    "steps": [
+      {
+        "type": "plain",
+        "kicker": "Dios te ama",
+        "title": "Tanto te amó.",
+        "text": "Antes de que hicieras algo bueno o malo, Dios ya te amaba. Tanto, que dio a su Hijo por ti.",
+        "verse": "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.",
+        "cite": "Juan 3:16",
+        "voice": "Quiero que sepas algo muy importante: [0.8] Dios te ama. [1.5] Antes de que hicieras algo bueno o malo, Él ya te amaba. [1.5] Tanto, que dio a su Hijo por ti. [2] Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, [0.4] para que todo aquel que en él cree, no se pierda, mas tenga vida eterna."
+      },
+      {
+        "type": "plain",
+        "kicker": "Lo necesitamos",
+        "title": "Todos fallamos.",
+        "text": "Todos hemos fallado y estamos lejos de Dios por nuestros propios medios. Por eso necesitamos a Jesús.",
+        "verse": "Por cuanto todos pecaron, y están destituidos de la gloria de Dios.",
+        "cite": "Romanos 3:23",
+        "voice": "La Biblia es honesta con nosotros: [0.6] todos hemos fallado. [1.5] Por cuanto todos pecaron, y están destituidos de la gloria de Dios. [2] Por nuestros propios medios no podemos llegar a Él. [1.5] Por eso Jesús vino... [1] murió en la cruz por nuestros pecados, y resucitó."
+      },
+      {
+        "type": "plain",
+        "kicker": "Él llama",
+        "title": "Está a tu puerta.",
+        "text": "Jesús no fuerza la entrada. Toca con amor y espera que le abras tu corazón.",
+        "verse": "He aquí, yo estoy a la puerta y llamo; si alguno oye mi voz y abre la puerta, entraré a él, y cenaré con él, y él conmigo.",
+        "cite": "Apocalipsis 3:20",
+        "voice": "Jesús no fuerza la puerta de tu corazón. [1.5] Toca con amor... [1] y espera que le abras. [2] He aquí, yo estoy a la puerta y llamo; [0.4] si alguno oye mi voz y abre la puerta, [0.4] entraré a él, y cenaré con él, y él conmigo."
+      },
+      {
+        "type": "plain",
+        "kicker": "Oración de fe",
+        "title": "Jesús, te abro mi corazón.",
+        "text": "Si quieres, repite: “Jesús, creo que moriste y resucitaste por mí. Perdóname. Te abro mi corazón. Sé mi Señor y Salvador”.",
+        "verse": "Si confesares con tu boca que Jesús es el Señor, y creyeres en tu corazón que Dios le levantó de los muertos, serás salvo.",
+        "cite": "Romanos 10:9",
+        "voice": "Si quieres recibir a Jesús, repite conmigo, desde tu corazón: [1.5] Señor Jesús... [1] creo que moriste en la cruz por mí, y que resucitaste. [1.5] Perdona mis pecados. [1.5] Hoy te abro mi corazón. [1.5] Sé mi Señor y mi Salvador. [1.5] Amén. [2] Si oraste esto de corazón, la Biblia dice que eres hijo de Dios. [1] Nos encantaría acompañarte en este nuevo camino."
+      }
+    ]
+  }
+]

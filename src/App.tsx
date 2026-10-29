@@ -254,9 +254,8 @@ function Navbar({ route }: { route: Route }) {
           </button>
         </div>
         <div className="mobile-menu-links">
-          {pages.map((p, i) => (
+          {pages.map((p) => (
             <a key={p.route} href={to(p.route)} className={route === p.route ? "is-active" : ""}>
-              <span>0{i + 1}</span>
               {p.label}
             </a>
           ))}

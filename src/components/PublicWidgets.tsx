@@ -431,11 +431,13 @@ function VisitSheet({ onClose }: { onClose: () => void }) {
 type FabPos = { side: "left" | "right"; bottom: number }
 const FAB_POS_KEY = "mai.fab.pos"
 const FAB_HINT_KEY = "mai.fab.hint"
+/** Space kept above the "+" so the opened menu always fits on screen. */
+const FAB_MENU_ROOM = 340
 
 function readFabPos(): FabPos | null {
   try {
     const pos = JSON.parse(localStorage.getItem(FAB_POS_KEY) || "null") as FabPos | null
-    return pos && { ...pos, bottom: Math.min(pos.bottom, window.innerHeight - 220) }
+    return pos && { ...pos, bottom: Math.min(pos.bottom, window.innerHeight - FAB_MENU_ROOM) }
   } catch {
     return null
   }
@@ -451,15 +453,6 @@ export default function FloatingActions() {
   }, [])
 
   const [expanded, setExpanded] = useState(false)
-  // On phones only "+" and "Ora aquí" show; on larger screens every shortcut stays visible.
-  const [compact, setCompact] = useState(() => window.matchMedia("(max-width: 800px)").matches)
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 800px)")
-    const onChange = () => setCompact(mq.matches)
-    mq.addEventListener("change", onChange)
-    return () => mq.removeEventListener("change", onChange)
-  }, [])
-  const showAll = !compact || expanded
   const close = useCallback(() => setOpen(null), [])
   const pick = (name: WidgetName) => {
     setExpanded(false)
@@ -478,7 +471,7 @@ export default function FloatingActions() {
     return () => window.removeEventListener("keydown", onKey)
   }, [expanded])
 
-  // "Palabra de hoy" can be dragged anywhere; it docks to the nearest side.
+  // The "+" can be dragged anywhere; it docks to the nearest side.
   const [pos, setPos] = useState<FabPos | null>(readFabPos)
   const [dragging, setDragging] = useState(false)
   const [hint, setHint] = useState(false)
@@ -558,7 +551,7 @@ export default function FloatingActions() {
     const rect = el.getBoundingClientRect()
     const next: FabPos = {
       side: rect.left + rect.width / 2 < window.innerWidth / 2 ? "left" : "right",
-      bottom: Math.round(Math.max(14, Math.min(window.innerHeight - rect.bottom, window.innerHeight - rect.height - 90))),
+      bottom: Math.round(Math.max(14, Math.min(window.innerHeight - rect.bottom, window.innerHeight - FAB_MENU_ROOM))),
     }
     fromRect.current = rect
     el.style.transform = ""
@@ -570,13 +563,13 @@ export default function FloatingActions() {
     }
   }
 
-  function onMainClick() {
+  function onToggleClick() {
     if (swallowClick.current) {
       swallowClick.current = false
       return
     }
     dismissHint()
-    pick("palabra")
+    setExpanded((v) => !v)
   }
 
   const placement: React.CSSProperties | undefined = pos
@@ -589,51 +582,48 @@ export default function FloatingActions() {
 
   return (
     <>
+      {expanded && <button className="fab-backdrop" aria-label="Cerrar accesos rápidos" tabIndex={-1} onClick={() => setExpanded(false)} />}
       <div
         ref={stackRef}
         className={`fab-stack ${expanded ? "is-open" : ""} ${pos?.side === "left" ? "is-left" : ""} ${dragging ? "is-dragging" : ""}`}
         style={placement}
-        aria-label="Accesos rápidos"
       >
-        <button className="fab fab-small" tabIndex={showAll ? 0 : -1} aria-hidden={!showAll} onClick={() => pick("visita")} aria-label="Quiero que me inviten">
-          <Icon name="users" />
-          <span>Quiero que me inviten</span>
-        </button>
-        <button className="fab fab-small" tabIndex={showAll ? 0 : -1} aria-hidden={!showAll} onClick={() => pick("oracion")} aria-label="Necesito oración">
-          <Icon name="hands" />
-          <span>Necesito oración</span>
-        </button>
+        <div className="fab-menu" id="fab-menu" role="group" aria-label="Accesos rápidos">
+          <button className="fab-item" onClick={() => pick("visita")}>
+            <Icon name="users" />
+            <span>Quiero que me inviten</span>
+          </button>
+          <button className="fab-item" onClick={() => pick("oracion")}>
+            <Icon name="hands" />
+            <span>Necesito oración</span>
+          </button>
+          <button className="fab-item" onClick={() => pick("momento")}>
+            <Icon name="heart" />
+            <span>Ora aquí</span>
+          </button>
+          <button className="fab-item" onClick={() => pick("palabra")}>
+            <Icon name="book" />
+            <span>Palabra de hoy</span>
+          </button>
+        </div>
         <button
-          className="fab fab-main"
-          tabIndex={showAll ? 0 : -1}
-          aria-hidden={!showAll}
-          onClick={onMainClick}
+          className="fab-toggle"
+          onClick={onToggleClick}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          aria-describedby={hint ? "fab-hint" : undefined}
+          aria-expanded={expanded}
+          aria-controls="fab-menu"
+          aria-label={expanded ? "Cerrar accesos rápidos" : "Abrir accesos rápidos: palabra de hoy, oración e invitación"}
         >
-          <Icon name="book" />
-          <span>Palabra de hoy</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4v16M4 12h16" />
+          </svg>
         </button>
-        <div className="fab-row">
-          <button
-            className="fab fab-toggle"
-            onClick={() => setExpanded((v) => !v)}
-            aria-expanded={expanded}
-            aria-label={expanded ? "Cerrar accesos rápidos" : "Más opciones: palabra de hoy, oración e invitación"}
-          >
-            <Icon name="close" />
-          </button>
-          <button className="fab fab-pray" onClick={() => pick("momento")}>
-            <Icon name="heart" />
-            <span>Ora aquí</span>
-          </button>
-        </div>
-        {hint && !compact && (
-          <p id="fab-hint" className="fab-hint" role="status">
-            Mantén presionado y arrástrame a donde quieras
+        {hint && (
+          <p className="fab-hint" role="status">
+            Toca el + para orar, pedir oración y más
           </p>
         )}
       </div>

@@ -1,8 +1,8 @@
-import { FormEvent, useEffect, useMemo, useState } from "react"
+import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react"
 import "./admin.css"
 import WebInbox, { WebOverview, webPages } from "./AdminWebInbox"
 import AdminAnnouncements from "./AdminAnnouncements"
-import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn, signOut } from "./lib/auth"
+import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn, signOut, staffName } from "./lib/auth"
 
 type AdminIcon = "home" | "people" | "team" | "calendar" | "school" | "target" | "wallet" | "expense" | "file" | "certificate" | "chart" | "bell" | "shield" | "settings" | "search" | "plus" | "arrow" | "check" | "clock" | "more" | "menu" | "close" | "upload" | "filter" | "download" | "eye" | "logout" | "globe"
 
@@ -180,6 +180,9 @@ function AIcon({ name }: { name: AdminIcon }) {
     </svg>
   )
 }
+
+/** Name of whoever is signed in, for the greeting and the user badges. */
+const StaffName = createContext("Equipo MAI")
 
 const avatar = (id: number) => `https://i.pravatar.cc/160?img=${id}`
 
@@ -385,13 +388,15 @@ function Login({
               <form onSubmit={submit} className="login-form">
                 {!resetting && (
                   <label>
-                    Correo electrónico
+                    {recovery ? "Correo electrónico" : "Usuario o correo"}
                     <input
                       required
                       name="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="nombre@iglesiamai.co"
+                      type={recovery ? "email" : "text"}
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      placeholder={recovery ? "nombre@iglesiamai.com" : "Tu usuario"}
                     />
                   </label>
                 )}
@@ -741,6 +746,7 @@ function BarChart() {
 }
 
 function Dashboard({ go }: { go: (s: string) => void }) {
+  const name = useContext(StaffName)
   const activity = [
     ["María Fernanda Gómez", "registró un pago de $150.000", "Hace 8 min", 47],
     ["Andrés Moreno", "inscribió a Juan Pérez en Encuentro", "Hace 24 min", 14],
@@ -753,7 +759,7 @@ function Dashboard({ go }: { go: (s: string) => void }) {
       <header className="page-welcome">
         <div>
           <p>Jueves, 9 de julio</p>
-          <h1>Buenos días, Daniela.</h1>
+          <h1>Hola, {name}.</h1>
           <span>Este es el pulso de MAI hoy.</span>
         </div>
         <button onClick={() => go("Personas")}>
@@ -2919,6 +2925,7 @@ function Sidebar({
   close: () => void
   logout: () => void
 }) {
+  const name = useContext(StaffName)
   return (
     <>
       <aside className={`admin-sidebar ${open ? "sidebar-open" : ""}`}>
@@ -2962,10 +2969,10 @@ function Sidebar({
           ))}
         </nav>
         <div className="sidebar-user">
-          <img src={avatar(44)} alt="" />
+          <span className="user-initial">{name[0].toUpperCase()}</span>
           <div>
-            <strong>Daniela Rojas</strong>
-            <span>Super administradora</span>
+            <strong>{name}</strong>
+            <span>Acceso total</span>
           </div>
           <button onClick={logout}>
             <AIcon name="logout" />
@@ -2992,6 +2999,7 @@ function AdminTopbar({
   menu: () => void
   go: (s: string) => void
 }) {
+  const name = useContext(StaffName)
   return (
     <header className="admin-topbar">
       <button className="mobile-menu-btn" onClick={menu}>
@@ -3011,10 +3019,10 @@ function AdminTopbar({
           <i />
         </button>
         <div className="top-user">
-          <img src={avatar(44)} alt="" />
+          <span className="user-initial">{name[0].toUpperCase()}</span>
           <p>
-            <strong>Daniela Rojas</strong>
-            <span>Super administradora</span>
+            <strong>{name}</strong>
+            <span>Acceso total</span>
           </p>
           <AIcon name="more" />
         </div>
@@ -3055,15 +3063,19 @@ function MobileNav({ page, go }: { page: string; go: (s: string) => void }) {
 
 export default function AdminApp({ onExit }: { onExit: () => void }) {
   const [logged, setLogged] = useState(false)
+  const [name, setName] = useState("Equipo MAI")
   const [checking, setChecking] = useState(true)
   const [resetting] = useState(() => window.location.search.includes(RECOVERY_FLAG))
   useEffect(() => {
     // Reset links sign the person in first; they still have to choose a new password.
     if (resetting) return setChecking(false)
     currentStaff()
-      .then((user) => setLogged(Boolean(user)))
+      .then((user) => {
+        setLogged(Boolean(user))
+        if (user) setName(staffName(user))
+      })
       .finally(() => setChecking(false))
-  }, [resetting])
+  }, [resetting, logged])
   const [page, setPage] = useState("Dashboard")
   const [sidebar, setSidebar] = useState(false)
   const [personId, setPersonId] = useState<number | null>(null)
@@ -3112,6 +3124,7 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
   return (
+    <StaffName.Provider value={name}>
     <main className="admin-app">
       <Sidebar
         page={page}
@@ -3126,5 +3139,6 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
       </div>
       <MobileNav page={page} go={go} />
     </main>
+    </StaffName.Provider>
   )
 }

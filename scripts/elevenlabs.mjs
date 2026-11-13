@@ -8,6 +8,7 @@
 //   node scripts/elevenlabs.mjs welcome [--force]  → opening breathing phrases (inicio/1..7)
 //   node scripts/elevenlabs.mjs needs [--force]    → per-need messages + release prayers (src/necesidades.json)
 //   node scripts/elevenlabs.mjs music              → soft instrumental background
+//   npx tsx scripts/elevenlabs.mjs algoritmo [--force] → every phrase of src/frasesOracion.ts (needs tsx to read it)
 //
 // Existing files are skipped unless --force, so re-running only fills what is new.
 import { access, mkdir, readFile, writeFile } from "node:fs/promises"
@@ -168,6 +169,24 @@ async function needs() {
   if (await save(join(outDir, "lee.mp3"), "Lee despacio lo que Dios te dice hoy... es para ti.", calm)) console.log("✓ lee.mp3")
 }
 
+/** The algorithm's answers and prayers, one file per phrase (src/frasesOracion.ts). */
+async function algoritmo() {
+  const { voiceLines } = await import("../src/lib/prayerCompose.ts")
+  const lines = voiceLines()
+  const dry = process.argv.includes("--dry")
+  if (!dry) await ensureVoice(VOICE)
+  let pending = 0
+  for (const { clip, text } of lines) {
+    const file = join(outDir, `${clip}.mp3`)
+    if (!force && (await exists(file))) continue
+    pending += text.length
+    if (dry) continue
+    await save(file, text, { stability: 0.62, style: 0.2, speed: 0.88 })
+    console.log(`✓ ${clip}.mp3  ${text}`)
+  }
+  console.log(`${lines.length} frases · ${pending} caracteres ${dry ? "por grabar" : "grabados"}`)
+}
+
 async function music() {
   await mkdir(outDir, { recursive: true })
   const audio = await call("/v1/music?output_format=mp3_44100_128", {
@@ -185,9 +204,9 @@ async function music() {
 }
 
 const [command] = process.argv.slice(2)
-const commands = { voices, sample: () => sample(...process.argv.slice(3)), prayers, names, welcome, needs, music }
+const commands = { voices, sample: () => sample(...process.argv.slice(3)), prayers, names, welcome, needs, algoritmo, music }
 if (!commands[command]) {
-  console.log("Comandos: voices | sample <voice_id>... | prayers [--force] | names [--force] | welcome [--force] | needs [--force] | music")
+  console.log("Comandos: voices | sample <voice_id>... | prayers [--force] | names [--force] | welcome [--force] | needs [--force] | algoritmo [--force] [--dry] | music")
   process.exit(1)
 }
 commands[command]().catch((err) => {

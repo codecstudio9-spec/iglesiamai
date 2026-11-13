@@ -269,6 +269,45 @@ function Navbar({ route }: { route: Route }) {
   )
 }
 
+/** The sharpest real photos of MAI, framed so faces stay in view on wide screens. */
+const heroSlides = [
+  { src: "/mai-welcome.jpg", position: "50% 50%", alt: "Madre e hija abrazadas durante el servicio" },
+  { src: "/mai-bautizo-3.jpg", position: "50% 16%", alt: "Oración antes del bautismo en Iglesia MAI" },
+  { src: "/mai-oracion-pareja.jpg", position: "50% 16%", alt: "Pareja orando junta en Iglesia MAI" },
+  { src: "/mai-bautizo-5.jpg", position: "50% 30%", alt: "Bautismos de Iglesia MAI" },
+  { src: "/mai-prayer.jpg", position: "50% 24%", alt: "Joven adorando a Dios en Iglesia MAI" },
+]
+
+/** Home hero: the photos cross-fade every 5 seconds with a slow zoom. */
+function HeroSlides() {
+  const [active, setActive] = useState(0)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (!document.hidden) setActive((i) => (i + 1) % heroSlides.length)
+    }, 5000)
+    return () => window.clearInterval(id)
+  }, [])
+  return (
+    <div className="hero-slides">
+      {heroSlides.map((slide, i) => (
+        <img
+          key={slide.src}
+          className={i === active ? "is-active" : ""}
+          src={slide.src}
+          alt={i === active ? slide.alt : ""}
+          aria-hidden={i !== active}
+          style={{ objectPosition: slide.position }}
+          fetchPriority={i === 0 ? "high" : "low"}
+          decoding="async"
+        />
+      ))}
+    </div>
+  )
+}
+
+/** The congregation video, now the backdrop of "Mensajes". */
+const sermonVideo = { src: "/videos/hero-mai.mp4", small: "/videos/hero-mai-720.mp4", poster: "/videos/hero-mai-poster.jpg" }
+
 function PageHero({
   eyebrow,
   title,
@@ -277,6 +316,7 @@ function PageHero({
   image,
   position = "center",
   crumb,
+  video,
 }: {
   eyebrow: string
   title: string
@@ -285,11 +325,20 @@ function PageHero({
   image: string
   position?: string
   crumb: string
+  /** A moving backdrop instead of the blurred photo. */
+  video?: typeof sermonVideo
 }) {
   return (
     <section className="page-hero">
-      {/* Real photos are small portraits: blurred as backdrop, shown sharp in a frame */}
-      <img className="page-hero-bg" src={image} alt="" style={{ objectPosition: position }} />
+      {video ? (
+        <video className="page-hero-bg page-hero-video" autoPlay muted loop playsInline preload="auto" poster={video.poster} aria-hidden="true">
+          <source src={video.small} type="video/mp4" media="(max-width: 768px)" />
+          <source src={video.src} type="video/mp4" />
+        </video>
+      ) : (
+        /* Real photos are small portraits: blurred as backdrop, shown sharp in a frame */
+        <img className="page-hero-bg" src={image} alt="" style={{ objectPosition: position }} />
+      )}
       <div className="hero-overlay" />
       <div className="page-hero-inner">
         <div className="page-hero-content">
@@ -659,20 +708,8 @@ function PhraseBand({ dark = false }: { dark?: boolean }) {
 function HomePage() {
   return (
     <>
-      <section className="hero hero--video">
-        <video
-          className="hero-media"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/videos/hero-mai-poster.jpg"
-          aria-label="Congregación de Iglesia MAI adorando juntos"
-        >
-          <source src="/videos/hero-mai-720.mp4" type="video/mp4" media="(max-width: 768px)" />
-          <source src="/videos/hero-mai.mp4" type="video/mp4" />
-        </video>
+      <section className="hero">
+        <HeroSlides />
         <div className="hero-overlay" />
         <div className="hero-content">
           <p className="hero-kicker">Iglesia MAI</p>
@@ -1275,6 +1312,7 @@ function MessagesPage() {
         intro="Cada domingo abrimos la Biblia con fe y expectativa. Mensajes que consuelan, confrontan y animan a vivir lo que creemos."
         image={preaching[0]}
         position="center 25%"
+        video={sermonVideo}
       />
 
       <section className="messages section-pad">
@@ -1706,7 +1744,7 @@ function PublicSite() {
   // Hero photos drift slower than the page while scrolling (gentle parallax)
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    const images = Array.from(document.querySelectorAll<HTMLElement>(".hero > img, .hero > video, .page-hero > img, .cta > img"))
+    const images = Array.from(document.querySelectorAll<HTMLElement>(".hero > .hero-slides, .page-hero > .page-hero-bg, .cta > img"))
     let frame = 0
     const update = () => {
       frame = 0

@@ -18,7 +18,7 @@ export const needs = needsData as Need[]
 
 const crisisWords = ["suicid", "matarme", "quitarme la vida", "hacerme dano", "no quiero vivir", "quiero morir", "acabar con todo", "me quiero morir", "cortarme"]
 
-const plain = (text: string) => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+export const plain = (text: string) => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
 
 /** Short keywords ("fe") must be whole words so "feliz" doesn't count. */
 function mentions(text: string, keyword: string) {
@@ -26,7 +26,7 @@ function mentions(text: string, keyword: string) {
   return k.length <= 3 ? new RegExp(`\\b${k}\\b`).test(text) : text.includes(k)
 }
 
-export function matchNeed(text: string): { need: Need; crisis: boolean } {
+export function matchNeed(text: string): { need: Need; crisis: boolean; score: number } {
   const t = plain(text)
   let best = needs.find((n) => n.id === "general")!
   let bestScore = 0
@@ -37,5 +37,5 @@ export function matchNeed(text: string): { need: Need; crisis: boolean } {
       bestScore = score
     }
   }
-  return { need: best, crisis: crisisWords.some((w) => t.includes(w)) }
+  return { need: best, crisis: crisisWords.some((w) => t.includes(w)), score: bestScore }
 }

@@ -4,7 +4,7 @@ import { moods, wordOfTheDay, type Mood } from "../palabra"
 import prayersData from "../oraciones.json"
 import namesData from "../nombres.json"
 import { matchNeed, needs } from "../lib/prayerMatch"
-import { verseForNeed } from "../versiculos"
+import { composeAnswer, composeRelease, rememberVerse } from "../lib/prayerCompose"
 
 type Step = {
   type: "breath" | "plain" | "write" | "word"
@@ -233,7 +233,7 @@ export default function PrayerMoment({
   const [burden, setBurden] = useState("")
   const [released, setReleased] = useState(false)
   // Prayer over what was just handed to God: the AI's words on screen, Luján's recording of that need aloud.
-  const [spoken, setSpoken] = useState<{ text: string; clip: string } | null>(null)
+  const [spoken, setSpoken] = useState<{ text: string; clips: string[] } | null>(null)
   const [praying, setPraying] = useState(false)
   const [releaseCrisis, setReleaseCrisis] = useState(false)
   const [greeted, setGreeted] = useState(false)
@@ -241,6 +241,8 @@ export default function PrayerMoment({
   const [reason, setReason] = useState("")
   const [answer, setAnswer] = useState<Answer | null>(null)
   const [answerClip, setAnswerClip] = useState("")
+  // When the algorithm answered: Luján reads its very phrases on the answer screen.
+  const [answerVoice, setAnswerVoice] = useState<string[] | null>(null)
   // The chosen prayer rewritten around what they shared (prepared while they read their word).
   const [personal, setPersonal] = useState<{ prayerId: string; teaching: string; steps: { title: string; text: string }[] } | null>(null)
 
@@ -261,8 +263,8 @@ export default function PrayerMoment({
       if (greeted) return []
       return [greetedNames.has(slug(greetName)) ? `nombres/${slug(greetName)}` : "saludo"]
     }
-    if (phase === "pray") return spoken ? [spoken.clip] : [`${prayer.id}/${step + 1}`]
-    if (phase === "answer") return ["lee"]
+    if (phase === "pray") return spoken ? spoken.clips : [`${prayer.id}/${step + 1}`]
+    if (phase === "answer") return answerVoice ?? ["lee"]
     if (phase === "intro") {
       if (answer && answer.prayer.id === prayer.id && answerClip) return [answerClip]
       // Came straight here from the welcome: say hello first.
@@ -271,7 +273,7 @@ export default function PrayerMoment({
     }
     if (phase === "end") return ["amen"]
     return []
-  }, [phase, prayer, step, greeted, greetName, spoken, answerClip])
+  }, [phase, prayer, step, greeted, greetName, spoken, answerClip, answerVoice])
   const { blocked, retry } = usePrayerSound(clips, sound)
 
   // Fetch the next recording ahead of time so the voice starts without a gap.
@@ -338,19 +340,43 @@ export default function PrayerMoment({
     const found = matchNeed(text)
     // Keywords found nothing? How they felt in "Palabra de hoy" still points the way.
     const hinted = found.need.id === "general" && hint?.mood ? needs.find((n) => n.id === moodNeed[hint.mood as Mood]) : undefined
-    const local = { ...found, need: hinted ?? found.need }
     const context = { mood: hint?.feeling ?? "", wordRef: hint?.wordRef ?? "" }
+    // The algorithm's answer, ready in case the AI can't answer.
+    const local = composeAnswer(text, firstName, hinted, context.wordRef)
+    const showLocal = () => {
+      const p = prayers.find((x) => x.id === local.need.prayerId) ?? prayers[0]
+      setAnswer({
+        need: local.label,
+        needId: local.need.id,
+        message: local.message,
+        verse: { ref: local.verse.ref, text: local.verse.text },
+        verseWhy: local.verseWhy,
+        prayer: { id: p.id, title: p.title },
+        crisis: local.crisis,
+      })
+      // Its phrases were already heard on the answer screen; nothing to repeat on the intro.
+      setAnswerClip("")
+      setAnswerVoice(local.voice)
+      setPersonal(null)
+      rememberVerse(local.verse.ref)
+    }
+    // The AI answers first (it reads the person best); the algorithm is there if it fails or is slow.
+    const controller = new AbortController()
+    const timer = window.setTimeout(() => controller.abort(), 15000)
     try {
       const res = await fetch("/api/oracion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, name: firstName, ...context }),
+        signal: controller.signal,
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setAnswer({ ...(data as Answer), crisis: data.crisis || local.crisis })
       setAnswerClip(messageClip(data.needId))
+      setAnswerVoice(null)
       setPersonal(null)
+      rememberVerse(data.verse.ref)
       fetch("/api/oracion-pasos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -360,19 +386,10 @@ export default function PrayerMoment({
         .then((p) => p && setPersonal(p))
         .catch(() => {})
     } catch {
-      // No AI right now: keywords pick the need; its recorded message is shown and heard.
-      const clip = messageClip(local.need.id)
-      const p = prayers.find((x) => x.id === local.need.prayerId) ?? prayers[0]
-      const verse = verseForNeed(local.need.id, context.wordRef)
-      setAnswer({
-        need: local.need.label,
-        needId: local.need.id,
-        message: local.need.messages[clip.endsWith("-1") ? 0 : 1],
-        verse: { ref: verse.ref, text: verse.text },
-        prayer: { id: p.id, title: p.title },
-        crisis: local.crisis,
-      })
-      setAnswerClip(clip)
+      // No AI right now: the algorithm's answer is just as close.
+      showLocal()
+    } finally {
+      window.clearTimeout(timer)
     }
     setPhase("answer")
   }
@@ -415,19 +432,13 @@ export default function PrayerMoment({
       return
     }
     setPraying(true)
+    // After the AI's first answer, the algorithm carries on: it prays over what they hand to God,
+    // following the need the AI read in them unless these words clearly point elsewhere.
+    const needId = local.score >= 1 ? local.need.id : answer?.needId ?? local.need.id
+    await new Promise((r) => window.setTimeout(r, 1200))
     try {
-      const res = await fetch("/api/oracion-entrega", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, name: firstName, step: current.title }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      const need = needs.find((n) => n.id === data.needId) ?? local.need
-      setSpoken({ text: data.text || need.release, clip: `entrega/${need.id}` })
-    } catch {
-      // No AI right now: the recorded prayer for the need the keywords found.
-      setSpoken({ text: local.need.release, clip: `entrega/${local.need.id}` })
+      const prayed = composeRelease(text, firstName, needId)
+      setSpoken({ text: prayed.text, clips: prayed.voice })
     } finally {
       setPraying(false)
     }

@@ -269,24 +269,52 @@ function Navbar({ route }: { route: Route }) {
   )
 }
 
-/** The sharpest real photos of MAI, framed so faces stay in view on wide screens. */
+/**
+ * Wide photos of the preachers, who stand on the right: the hero fades them in
+ * from the left so the headline reads on dark and the preacher stays in view.
+ * `position` keeps the preacher on screen when a phone crops the sides.
+ */
 const heroSlides = [
-  { src: "/mai-welcome.jpg", position: "50% 50%", alt: "Madre e hija abrazadas durante el servicio" },
-  { src: "/mai-bautizo-3.jpg", position: "50% 16%", alt: "Oración antes del bautismo en Iglesia MAI" },
-  { src: "/mai-oracion-pareja.jpg", position: "50% 16%", alt: "Pareja orando junta en Iglesia MAI" },
-  { src: "/mai-bautizo-5.jpg", position: "50% 30%", alt: "Bautismos de Iglesia MAI" },
-  { src: "/mai-prayer.jpg", position: "50% 24%", alt: "Joven adorando a Dios en Iglesia MAI" },
+  {
+    src: "/mai-hero-adoracion.jpg", position: "74% center", alt: "Predicador de Iglesia MAI adorando con la mano en alto",
+    kicker: "Iglesia MAI · Bogotá",
+    title: "Extendiendo el reino de Dios,", accent: "un corazón a la vez.",
+    copy: "Un lugar para conocer a Dios, crecer en comunidad y vivir el propósito que Él tiene para ti.",
+  },
+  {
+    src: "/mai-hero-estad-quietos.jpg", position: "72% center", alt: "Pastor de Iglesia MAI predicando «Estad quietos»",
+    kicker: "Estad quietos",
+    title: "Detente un momento:", accent: "Dios está aquí.",
+    copy: "Un lugar para descansar en Su presencia, escuchar Su voz y encontrar paz para el camino.",
+  },
+  {
+    src: "/mai-hero-paz-dios.jpg", position: "72% center", alt: "Predicadora de Iglesia MAI hablando de la paz de Dios",
+    kicker: "Paz de Dios",
+    title: "Paz para tu corazón,", accent: "paz para tu casa.",
+    copy: "Una familia que ora contigo y una Palabra que te sostiene cada semana.",
+  },
+  {
+    src: "/mai-hero-pastora.jpg", position: "64% center", alt: "Pastora de Iglesia MAI leyendo la Palabra",
+    kicker: "El llamado",
+    title: "Dios tiene un propósito", accent: "para tu vida.",
+    copy: "Cada domingo abrimos la Biblia para crecer juntos y descubrir el llamado que Él tiene para ti.",
+  },
 ]
 
-/** Home hero: the photos cross-fade every 5 seconds with a slow zoom. */
-function HeroSlides() {
+/** Which slide is showing: photo and words change together every 7 seconds. */
+function useHeroSlide() {
   const [active, setActive] = useState(0)
   useEffect(() => {
     const id = window.setInterval(() => {
       if (!document.hidden) setActive((i) => (i + 1) % heroSlides.length)
-    }, 5000)
+    }, 7000)
     return () => window.clearInterval(id)
   }, [])
+  return active
+}
+
+/** Home hero: the photos cross-fade every 7 seconds with a slow zoom. */
+function HeroSlides({ active }: { active: number }) {
   return (
     <div className="hero-slides">
       {heroSlides.map((slide, i) => (
@@ -706,22 +734,28 @@ function PhraseBand({ dark = false }: { dark?: boolean }) {
 /* ------------------------------------------------------------------ */
 
 function HomePage() {
+  const active = useHeroSlide()
   return (
     <>
-      <section className="hero">
-        <HeroSlides />
+      <section className="hero hero--slides">
+        <HeroSlides active={active} />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <p className="hero-kicker">Iglesia MAI</p>
-          <h1>
-            Extendiendo el reino de Dios,{" "}
-            <br />
-            <em>un corazón a la vez.</em>
-          </h1>
-          <p className="hero-copy">
-            Un lugar para conocer a Dios, crecer en comunidad y vivir el propósito que Él tiene para
-            ti.
-          </p>
+          <h1 className="sr-only">Iglesia Cristiana MAI en Bogotá</h1>
+          {/* All four messages share one spot, so the buttons never jump when the words change */}
+          <div className="hero-texts" aria-live="off">
+            {heroSlides.map((slide, i) => (
+              <div key={slide.src} className={i === active ? "is-active" : ""} aria-hidden={i !== active}>
+                <p className="hero-kicker">{slide.kicker}</p>
+                <p className="hero-title">
+                  {slide.title}{" "}
+                  <br />
+                  <em>{slide.accent}</em>
+                </p>
+                <p className="hero-copy">{slide.copy}</p>
+              </div>
+            ))}
+          </div>
           <div className="button-row">
             <Button href={to("nosotros")} variant="light">
               Quiero conocer MAI

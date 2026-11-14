@@ -246,6 +246,22 @@ export const versiculos: Verse[] = [
   { ref: "Jeremías 33:3", text: "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces.", needs: ["general", "direccion"], cuando: "quiere escuchar a Dios, busca revelación" },
   { ref: "Salmos 84:10", text: "Porque mejor es un día en tus atrios que mil fuera de ellos. Escogería antes estar a la puerta de la casa de mi Dios, que habitar en las moradas de maldad.", needs: ["general", "fe"], cuando: "volver a congregarse, valorar la casa de Dios" },
   { ref: "Salmos 27:4", text: "Una cosa he demandado a Jehová, ésta buscaré; que esté yo en la casa de Jehová todos los días de mi vida, para contemplar la hermosura de Jehová, y para inquirir en su templo.", needs: ["general", "fe"], cuando: "anhela intimidad y adoración" },
+  // Temas concretos de "Ora aquí" (boda, puertas, salud, familia, finanzas, hogar)
+  { ref: "Génesis 2:24", text: "Por tanto, dejará el hombre a su padre y a su madre, y se unirá a su mujer, y serán una sola carne.", needs: ["familia"], cuando: "boda, se van a casar, formar un hogar nuevo" },
+  { ref: "Proverbios 18:22", text: "El que halla esposa halla el bien, Y alcanza la benevolencia de Jehová.", needs: ["familia", "gratitud"], cuando: "boda, compromiso, agradece por su pareja" },
+  { ref: "Apocalipsis 3:8", text: "Yo conozco tus obras; he aquí, he puesto delante de ti una puerta abierta, la cual nadie puede cerrar; porque aunque tienes poca fuerza, has guardado mi palabra, y no has negado mi nombre.", needs: ["direccion", "fe"], cuando: "pide que Dios abra puertas: boda, trabajo, visa, oportunidad" },
+  { ref: "Mateo 7:7", text: "Pedid, y se os dará; buscad, y hallaréis; llamad, y se os abrirá.", needs: ["direccion", "fe"], cuando: "pide una puerta abierta, una respuesta, una oportunidad" },
+  { ref: "Isaías 43:19", text: "He aquí que yo hago cosa nueva; pronto saldrá a luz; ¿no la conoceréis? Otra vez abriré camino en el desierto, y ríos en la soledad.", needs: ["direccion", "cansancio"], cuando: "no ve salida, necesita un camino nuevo" },
+  { ref: "Jeremías 17:14", text: "Sáname, oh Jehová, y seré sano; sálvame, y seré salvo; porque tú eres mi alabanza.", needs: ["enfermedad"], cuando: "pide sanidad para su cuerpo" },
+  { ref: "Isaías 43:2", text: "Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán. Cuando pases por el fuego, no te quemarás, ni la llama arderá en ti.", needs: ["enfermedad", "cansancio"], cuando: "cirugía, tratamiento, prueba muy dura" },
+  { ref: "Salmos 90:17", text: "Sea la luz de Jehová nuestro Dios sobre nosotros, Y la obra de nuestras manos confirma sobre nosotros; Sí, la obra de nuestras manos confirma.", needs: ["direccion"], cuando: "trabajo, negocio, proyecto que necesita la bendición de Dios" },
+  { ref: "2 Corintios 9:8", text: "Y poderoso es Dios para hacer que abunde en vosotros toda gracia, a fin de que, teniendo siempre en todas las cosas todo lo suficiente, abundéis para toda buena obra.", needs: ["ansiedad", "gratitud"], cuando: "finanzas, provisión, que alcance para todo" },
+  { ref: "Isaías 32:18", text: "Y mi pueblo habitará en morada de paz, en habitaciones seguras, y en recreos de reposo.", needs: ["familia", "ansiedad"], cuando: "vivienda, casa propia, arriendo, un hogar seguro" },
+  { ref: "Efesios 6:2-3", text: "Honra a tu padre y a tu madre, que es el primer mandamiento con promesa; para que te vaya bien, y seas de larga vida sobre la tierra.", needs: ["familia"], cuando: "ora por su papá o su mamá" },
+  { ref: "Proverbios 17:17", text: "En todo tiempo ama el amigo, Y es como un hermano en tiempo de angustia.", needs: ["familia", "soledad"], cuando: "ora por un hermano o un amigo" },
+  { ref: "Salmos 133:1", text: "¡Mirad cuán bueno y cuán delicioso es Habitar los hermanos juntos en armonía!", needs: ["familia"], cuando: "hermanos distanciados, unidad en la familia" },
+  { ref: "2 Pedro 3:9", text: "El Señor no retarda su promesa, según algunos la tienen por tardanza, sino que es paciente para con nosotros, no queriendo que ninguno perezca, sino que todos procedan al arrepentimiento.", needs: ["familia", "conocer"], cuando: "ora por la salvación de un ser querido que no conoce a Dios" },
+
 ]
 
 /** A verse for a need, rotating so repeat visits don't always get the same one. */

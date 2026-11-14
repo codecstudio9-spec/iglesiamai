@@ -8,6 +8,7 @@
 import * as F from "../frasesOracion"
 import { matchNeed, plain, type Need } from "./prayerMatch"
 import { versiculos, type Verse } from "../versiculos"
+import { temas, aperturasTema, cierresTema, type Tema } from "../temas"
 
 const RECENT_KEY = "mai.oracion.recientes"
 
@@ -200,4 +201,97 @@ export function composeRelease(text: string, name: string, needId: string) {
     pick(F.entrega.cierre, ctx, 3),
   ]
   return { text: textOf(lines), voice: voiceOf(lines) }
+}
+
+/* ------------------------------------------------------------------ */
+/* Temas: lo concreto por lo que vienen a orar (src/temas.ts)          */
+/* ------------------------------------------------------------------ */
+
+/** Topics about a person; when another topic also shows up ("la salud de mi hermana"), that one leads. */
+const personTopics = new Set(["hijos", "padres", "hermanos", "familia", "matrimonio"])
+
+const any = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)]
+
+/** Whole words or word starts, so "fe" never matches "feliz" and "tia" never "noticia". */
+const said = (t: string, clave: string) => new RegExp(`(^|[^a-zñ])${plain(clave).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(t)
+
+export const temaById = (id: unknown) => temas.find((x) => x.id === id)
+
+/** The topic of what they wrote; ties go to the more specific topic (earlier in temas.ts). */
+export function findTema(text: string): Tema {
+  // "Papá Dios" is how many here call God: it is not a prayer for their dad.
+  const t = plain(text).replace(/papa\s+dios|papito\s+dios|padre\s+celestial|padre\s+dios/g, " dios ")
+  const scored = temas.map((x) => ({ x, score: x.claves.filter((k) => said(t, k)).length })).filter((s) => s.score > 0)
+  if (!scored.length) return temaById("general")!
+  const best = (list: typeof scored) => list.reduce((a, b) => (b.score > a.score ? b : a))
+  const topic = scored.filter((s) => !personTopics.has(s.x.id))
+  return (topic.length ? best(topic) : best(scored)).x
+}
+
+export type TemaAnswer = {
+  tema: Tema
+  /** How we name it in a sentence: "tu boda", "tu hermana". */
+  frase: string
+  label: string
+  message: string
+  verse: Verse
+  verseWhy: string
+  crisis: boolean
+}
+
+/** What they asked for, named the way a person would: "tu hermana Laura" beats "tus hermanos". */
+export function temaFrase(text: string, tema: Tema) {
+  const quien = findPerson(text)
+  return quien && quien !== "tu casa" ? quien : tema.tema
+}
+
+/** The verse for a topic, rotating so a second visit gets a different one. */
+export function temaVerse(tema: Tema, exclude?: string): Verse {
+  const recent = new Set([...readRecent(), exclude ?? ""])
+  const pool = tema.versos.map((ref) => versiculos.find((v) => v.ref === ref)).filter((v): v is Verse => !!v)
+  const fresh = pool.filter((v) => !recent.has(v.ref))
+  return any(fresh.length ? fresh : pool.length ? pool : versiculos.filter((v) => v.needs.includes(tema.need)))
+}
+
+/**
+ * The algorithm's answer for a topic: a personal opening, how they feel (when
+ * they said it), a word for THAT request and an invitation to pray for it.
+ * Every line is drawn at random, so two visits rarely read the same.
+ */
+export function composeTemaAnswer(text: string, name: string, forced?: Tema, excludeRef?: string): TemaAnswer {
+  const tema = forced ?? findTema(text)
+  const frase = temaFrase(text, tema)
+  const fill2 = (p: string) => fill(p, { nombre: name, quien: "", situacion: "" }).replace(/\{tema\}/g, frase)
+  const verse = temaVerse(tema, excludeRef)
+  const crisis = matchNeed(text).crisis
+  if (crisis) {
+    const near = versiculos.find((v) => v.ref === "Salmos 34:18") ?? verse
+    return { tema, frase, label: "Tu vida vale mucho", message: fill2(F.crisis[0]), verse: near, verseWhy: "Dios está cerca de ti ahora mismo, aunque no lo sientas.", crisis }
+  }
+  const feeling = tema.id === "gratitud" ? undefined : findFeeling(plain(text))
+  const lines = [
+    fill2(any(aperturasTema)),
+    feeling && Math.random() < 0.7 ? fill2(any(feeling.validar)) : "",
+    fill2(any(tema.mensajes)),
+    fill2(any(cierresTema)),
+  ].filter(Boolean)
+  const label = frase !== tema.tema ? `Orando por ${frase}` : tema.label
+  return {
+    tema,
+    frase,
+    label: label.charAt(0).toLocaleUpperCase("es") + label.slice(1),
+    message: lines.join(" "),
+    verse,
+    verseWhy: tema.porQue[verse.ref] ?? fill2(any(F.porQue.todas)),
+    crisis,
+  }
+}
+
+/** Every recording the topic prayers need (scripts/elevenlabs.mjs temas). */
+export function temaVoiceLines() {
+  return temas.flatMap((x) => [
+    { clip: `temas/${x.id}-pedir`, text: x.pedir.texto },
+    { clip: `temas/${x.id}-palabra`, text: x.palabra },
+    { clip: `temas/${x.id}-declarar`, text: x.declarar.texto },
+  ])
 }

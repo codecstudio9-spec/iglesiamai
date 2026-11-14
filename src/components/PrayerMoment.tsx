@@ -4,7 +4,8 @@ import { moods, wordOfTheDay, type Mood } from "../palabra"
 import prayersData from "../oraciones.json"
 import namesData from "../nombres.json"
 import { matchNeed, needs } from "../lib/prayerMatch"
-import { composeAnswer, composeRelease, rememberVerse } from "../lib/prayerCompose"
+import { composeRelease, composeTemaAnswer, rememberVerse, temaById, temaFrase } from "../lib/prayerCompose"
+import type { Tema } from "../temas"
 
 type Step = {
   type: "breath" | "plain" | "write" | "word"
@@ -17,11 +18,36 @@ type Step = {
   release?: string
   released?: string
   voice: string
+  /** Recordings for this step when they are not `${prayer.id}/${n}` (topic prayers). */
+  clips?: string[]
+  /** Luján's word about their request, under the verse of a "word" step. */
+  palabra?: string
 }
 
 type Prayer = { id: string; title: string; theme: string; teaching: string; steps: Step[] }
 
 const prayers = prayersData as Prayer[]
+
+/**
+ * The guided prayer about THEIR request (their wedding, their sister, a job):
+ * breathe, present it to God, hear a word about it, declare it in faith.
+ * Nothing asks again what they already wrote.
+ */
+function temaPrayer(tema: Tema, frase: string): Prayer {
+  const breath = prayers.find((p) => p.id === "momento")!.steps[0]
+  return {
+    id: `tema-${tema.id}`,
+    title: `Oración por ${frase}`,
+    theme: tema.label,
+    teaching: "",
+    steps: [
+      { ...breath, clips: ["momento/1"] },
+      { type: "plain", kicker: "Presenta", title: tema.pedir.titulo, text: tema.pedir.texto, voice: "", clips: [`temas/${tema.id}-pedir`] },
+      { type: "word", kicker: "Escucha", title: "Dios te habla.", palabra: tema.palabra, voice: "", clips: [`temas/${tema.id}-palabra`] },
+      { type: "plain", kicker: "Declara", title: tema.declarar.titulo, text: tema.declarar.texto, voice: "", clips: [`temas/${tema.id}-declarar`] },
+    ],
+  }
+}
 const greetedNames = new Set(namesData as string[])
 
 const AUDIO = "/audio/oracion"
@@ -243,6 +269,8 @@ export default function PrayerMoment({
   const [answerClip, setAnswerClip] = useState("")
   // When the algorithm answered: Luján reads its very phrases on the answer screen.
   const [answerVoice, setAnswerVoice] = useState<string[] | null>(null)
+  // The prayer about what they asked for, ready when they finish reading their word.
+  const [topicPrayer, setTopicPrayer] = useState<Prayer | null>(null)
   // The chosen prayer rewritten around what they shared (prepared while they read their word).
   const [personal, setPersonal] = useState<{ prayerId: string; teaching: string; steps: { title: string; text: string }[] } | null>(null)
 
@@ -261,9 +289,10 @@ export default function PrayerMoment({
     if (phase === "welcome") return WELCOME_CLIPS
     if (phase === "choose") {
       if (greeted) return []
-      return [greetedNames.has(slug(greetName)) ? `nombres/${slug(greetName)}` : "saludo"]
+      // "Hola, Douglas... qué bueno que estás aquí." then the invitation to write.
+      return [greetedNames.has(slug(greetName)) ? `nombres/${slug(greetName)}` : "saludo", "pause:500", "escribe"]
     }
-    if (phase === "pray") return spoken ? spoken.clips : [`${prayer.id}/${step + 1}`]
+    if (phase === "pray") return spoken ? spoken.clips : (current.clips ?? [`${prayer.id}/${step + 1}`])
     if (phase === "answer") return answerVoice ?? ["lee"]
     if (phase === "intro") {
       if (answer && answer.prayer.id === prayer.id && answerClip) return [answerClip]
@@ -273,7 +302,7 @@ export default function PrayerMoment({
     }
     if (phase === "end") return ["amen"]
     return []
-  }, [phase, prayer, step, greeted, greetName, spoken, answerClip, answerVoice])
+  }, [phase, prayer, step, greeted, greetName, spoken, answerClip, answerVoice, current.clips])
   const { blocked, retry } = usePrayerSound(clips, sound)
 
   // Fetch the next recording ahead of time so the voice starts without a gap.
@@ -331,36 +360,28 @@ export default function PrayerMoment({
     if (name.trim() !== prefs.name) saveName(name.trim())
   }
 
-  /** Asks the server (OpenRouter, verified verses only) for a word that fits why they came. */
+  /**
+   * The AI reads what they wrote and answers personally (verified verses only);
+   * the algorithm answers if it can't. Either way the topic decides the prayer
+   * that follows, so everything stays about what they came to pray for.
+   */
   async function ask(text = reason) {
     if (text.trim().length < 3) return
     setReason(text)
     setGreeted(true)
     setPhase("listen")
-    const found = matchNeed(text)
-    // Keywords found nothing? How they felt in "Palabra de hoy" still points the way.
-    const hinted = found.need.id === "general" && hint?.mood ? needs.find((n) => n.id === moodNeed[hint.mood as Mood]) : undefined
     const context = { mood: hint?.feeling ?? "", wordRef: hint?.wordRef ?? "" }
-    // The algorithm's answer, ready in case the AI can't answer.
-    const local = composeAnswer(text, firstName, hinted, context.wordRef)
-    const showLocal = () => {
-      const p = prayers.find((x) => x.id === local.need.prayerId) ?? prayers[0]
-      setAnswer({
-        need: local.label,
-        needId: local.need.id,
-        message: local.message,
-        verse: { ref: local.verse.ref, text: local.verse.text },
-        verseWhy: local.verseWhy,
-        prayer: { id: p.id, title: p.title },
-        crisis: local.crisis,
-      })
-      // Its phrases were already heard on the answer screen; nothing to repeat on the intro.
+    const started = Date.now()
+    const local = composeTemaAnswer(text, firstName, undefined, context.wordRef)
+    const finish = (a: Omit<Answer, "prayer">, tema: Tema, frase: string) => {
+      const p = temaPrayer(tema, frase)
+      setTopicPrayer(p)
+      setAnswer({ ...a, prayer: { id: p.id, title: p.title } })
       setAnswerClip("")
-      setAnswerVoice(local.voice)
+      setAnswerVoice(["lee-esto"]) // "Primero... quiero que leas esto. Es solo para ti."
       setPersonal(null)
-      rememberVerse(local.verse.ref)
+      rememberVerse(a.verse.ref)
     }
-    // The AI answers first (it reads the person best); the algorithm is there if it fails or is slow.
     const controller = new AbortController()
     const timer = window.setTimeout(() => controller.abort(), 15000)
     try {
@@ -372,26 +393,34 @@ export default function PrayerMoment({
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      setAnswer({ ...(data as Answer), crisis: data.crisis || local.crisis })
-      setAnswerClip(messageClip(data.needId))
-      setAnswerVoice(null)
-      setPersonal(null)
-      rememberVerse(data.verse.ref)
-      fetch("/api/oracion-pasos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prayerId: data.prayer.id, text, name: firstName, mood: context.mood }),
-      })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((p) => p && setPersonal(p))
-        .catch(() => {})
+      const tema = temaById(data.topicId) ?? local.tema
+      finish({ ...(data as Answer), crisis: data.crisis || local.crisis }, tema, temaFrase(text, tema))
     } catch {
-      // No AI right now: the algorithm's answer is just as close.
-      showLocal()
+      // No AI right now: the algorithm writes from the same topic. A breath first, never instant.
+      await new Promise((r) => window.setTimeout(r, Math.max(0, 1800 - (Date.now() - started))))
+      finish(
+        {
+          need: local.label,
+          needId: local.tema.need,
+          message: local.message,
+          verse: { ref: local.verse.ref, text: local.verse.text },
+          verseWhy: local.verseWhy,
+          crisis: local.crisis,
+        },
+        local.tema,
+        local.frase,
+      )
     } finally {
       window.clearTimeout(timer)
     }
     setPhase("answer")
+  }
+
+  /** Straight into the prayer about their request (no intro: they already told us why). */
+  function prayForIt() {
+    if (!topicPrayer) return choose(today)
+    setPrayer(topicPrayer)
+    start()
   }
 
   function choose(p: Prayer) {
@@ -515,7 +544,7 @@ export default function PrayerMoment({
         <div className="moment-body moment-choose" key="choose">
           <p className="moment-kicker">{firstName ? `Hola, ${firstName}` : "Un momento con Dios"}</p>
           <h2>
-            ¿Cómo quieres <em>acercarte a Él hoy?</em>
+            ¿Qué quieres poner hoy <em>en las manos de Papá?</em>
           </h2>
           {hint?.feeling && (
             <div className="moment-hint">
@@ -534,19 +563,19 @@ export default function PrayerMoment({
               ask()
             }}
           >
-            <label htmlFor="moment-reason">{hint?.feeling ? "¿Quieres contarle algo más?" : "¿Por qué quieres orar hoy?"}</label>
+            <label htmlFor="moment-reason">{hint?.feeling ? "¿Quieres contarle algo más?" : "Escribe aquí por qué quieres orar hoy"}</label>
             <textarea
               id="moment-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Cuéntale a Dios lo que estás viviendo: una preocupación, una alegría, una decisión…"
+              placeholder="Por ejemplo: quiero orar por mi boda, por la salud de mi mamá, por un trabajo, por mi hermana…"
               rows={3}
               maxLength={800}
             />
             <div>
               <small>Se usa solo para encontrar tu versículo. No guardamos lo que escribes.</small>
               <button type="submit" className="button button-light" disabled={reason.trim().length < 3}>
-                Buscar una palabra para mí <Icon name="arrow" />
+                Orar por esto <Icon name="arrow" />
               </button>
             </div>
           </form>
@@ -572,7 +601,7 @@ export default function PrayerMoment({
         <div className="moment-body" key="answer">
           <p className="moment-kicker">{answer.need}</p>
           <h2>
-            Una palabra <em>para ti{firstName ? `, ${firstName}` : ""}.</em>
+            Primero quiero que leas esto{firstName ? `, ${firstName}` : ""}. <em>Es solo para ti.</em>
           </h2>
           <p className="moment-text moment-answer">{answer.message}</p>
           <blockquote className="moment-verse moment-verse-big">
@@ -595,9 +624,9 @@ export default function PrayerMoment({
             <button
               ref={nextRef}
               className="button button-light"
-              onClick={() => choose(prayers.find((p) => p.id === answer.prayer.id) ?? today)}
+              onClick={prayForIt}
             >
-              Orar: {answer.prayer.title} <Icon name="arrow" />
+              Orar ahora <Icon name="arrow" />
             </button>
             <button className="moment-back" onClick={() => setPhase("choose")}>
               Elegir otra oración
@@ -648,7 +677,11 @@ export default function PrayerMoment({
               <blockquote className="moment-verse moment-verse-big">
                 “{theirWord?.text ?? word.text}”<cite>{theirWord?.ref ?? word.ref}</cite>
               </blockquote>
-              {!theirWord && <p className="moment-text">{word.message}</p>}
+              {current.palabra ? (
+                <p className="moment-text moment-palabra">{current.palabra}</p>
+              ) : (
+                !theirWord && <p className="moment-text">{word.message}</p>
+              )}
             </>
           ) : (
             <>

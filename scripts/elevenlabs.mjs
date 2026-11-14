@@ -9,6 +9,7 @@
 //   node scripts/elevenlabs.mjs needs [--force]    → per-need messages + release prayers (src/necesidades.json)
 //   node scripts/elevenlabs.mjs music              → soft instrumental background
 //   npx tsx scripts/elevenlabs.mjs algoritmo [--force] → every phrase of src/frasesOracion.ts (needs tsx to read it)
+//   npx tsx scripts/elevenlabs.mjs temas [--force] [--dry] → topic prayers of src/temas.ts + "escribe" and "lee-esto"
 //
 // Existing files are skipped unless --force, so re-running only fills what is new.
 import { access, mkdir, readFile, writeFile } from "node:fs/promises"
@@ -187,6 +188,28 @@ async function algoritmo() {
   console.log(`${lines.length} frases · ${pending} caracteres ${dry ? "por grabar" : "grabados"}`)
 }
 
+/** "Ora aquí" by topic: the invitation to write, "read this first", and each topic's prayer. */
+async function temasVoz() {
+  const { temaVoiceLines } = await import("../src/lib/prayerCompose.ts")
+  const lines = [
+    { clip: "escribe", text: "Escribe aquí por qué quieres orarle a Papá hoy... ¿Qué es lo que quieres poner en Sus manos?" },
+    { clip: "lee-esto", text: "Primero... quiero que leas esto. Es solo para ti." },
+    ...temaVoiceLines(),
+  ]
+  const dry = process.argv.includes("--dry")
+  if (!dry) await ensureVoice(VOICE)
+  let pending = 0
+  for (const { clip, text } of lines) {
+    const file = join(outDir, `${clip}.mp3`)
+    if (!force && (await exists(file))) continue
+    pending += text.length
+    if (dry) continue
+    await save(file, text, { stability: 0.6, style: 0.25, speed: 0.88 })
+    console.log(`✓ ${clip}.mp3`)
+  }
+  console.log(`${lines.length} grabaciones · ${pending} caracteres ${dry ? "por grabar" : "grabados"}`)
+}
+
 async function music() {
   await mkdir(outDir, { recursive: true })
   const audio = await call("/v1/music?output_format=mp3_44100_128", {
@@ -204,9 +227,9 @@ async function music() {
 }
 
 const [command] = process.argv.slice(2)
-const commands = { voices, sample: () => sample(...process.argv.slice(3)), prayers, names, welcome, needs, algoritmo, music }
+const commands = { voices, sample: () => sample(...process.argv.slice(3)), prayers, names, welcome, needs, algoritmo, temas: temasVoz, music }
 if (!commands[command]) {
-  console.log("Comandos: voices | sample <voice_id>... | prayers [--force] | names [--force] | welcome [--force] | needs [--force] | algoritmo [--force] [--dry] | music")
+  console.log("Comandos: voices | sample <voice_id>... | prayers [--force] | names [--force] | welcome [--force] | needs [--force] | algoritmo [--force] [--dry] | temas [--force] [--dry] | music")
   process.exit(1)
 }
 commands[command]().catch((err) => {

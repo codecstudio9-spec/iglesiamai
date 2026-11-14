@@ -10,6 +10,7 @@
  */
 import { words } from "../src/palabra.js"
 import { versiculos } from "../src/versiculos.js"
+import { temas } from "../src/temas.js"
 import prayersData from "../src/oraciones.json" with { type: "json" }
 import needsData from "../src/necesidades.json" with { type: "json" }
 
@@ -25,11 +26,14 @@ export type PrayerAnswer = {
   verseWhy: string
   prayer: { id: string; title: string }
   crisis: boolean
+  /** The concrete topic (src/temas.ts): the guided prayer that follows is about it. */
+  topicId: string
 }
 
 const prayers = prayersData as Prayer[]
 const needs = needsData as Need[]
 const needList = needs.map((n) => `${n.id} | ${n.label}`).join("\n")
+const topicList = temas.map((t) => `${t.id} | ${t.label}`).join("\n")
 
 /** Every verified verse on the site, once each; the tagged catalog says when each one fits. */
 const verses: { id: string; ref: string; text: string; cuando: string }[] = (() => {
@@ -50,6 +54,8 @@ Tu tarea:
 1. Escoge UNA necesidad de la lista (su id).
 2. Escribe un mensaje (3 a 5 frases) en español latino, tuteando, con su nombre si lo tienes:
    - Nombra su situación concreta con sus propias palabras o detalles (por ejemplo "tu hijo Andrés", "la entrevista del jueves", "esa deuda", "lo que pasó con tu papá"), con delicadeza.
+   - TODO el mensaje gira alrededor de lo que pidió: si ora por su boda, habla de su boda; si ora por su hermana, de su hermana. Nada genérico ni de otro tema.
+   - Suena como una persona cercana que le habla al oído, cálida y humana; varía tus palabras, no uses fórmulas.
    - Valida lo que siente en una frase, sin exagerar.
    - Dile algo verdadero y específico de Dios para ESA situación (quién es Él ahí: Padre que espera al hijo, Dios que pelea por ti, el que ve a la que nadie ve...).
    - Termina con UN paso pequeño y concreto para hoy (algo que pueda decirle a Dios, hacer o soltar).
@@ -57,16 +63,16 @@ Tu tarea:
    Sin juicio, sin sermones, sin prometer milagros ni dar consejos médicos o legales. No cites versículos dentro del mensaje.
 3. Escoge UN versículo del catálogo. Cada versículo trae "cuándo usarlo": prefiere el que coincida con su situación PRECISA (no el más famoso). Evita los muy conocidos (Juan 3:16, Jeremías 29:11, Filipenses 4:13) si hay uno más específico. Si la persona pide un pasaje que está en el catálogo, úsalo.
 4. Escribe "verseWhy": UNA frase (máximo 180 caracteres) que conecte ese versículo con su caso, por ejemplo "Pedro escribió esto para gente probada como tú: Dios sabe sacarte de esta tentación, no solo perdonarte después."
-5. Escoge UNA oración guiada de la lista que mejor la acompañe.
+5. Escoge UNA oración guiada de la lista que mejor la acompañe, y UN tema de la lista TEMAS (su id): lo concreto por lo que ora (su boda, su hermana, un trabajo, la salud de alguien...). Si ora por una persona y además por algo concreto de ella (la salud de su mamá), escoge lo concreto (salud). La oración que sigue será sobre ese tema, así que escógelo con precisión.
 6. Si menciona querer morir, hacerse daño, suicidio, violencia, abuso o un peligro inmediato, marca crisis=true y en el mensaje anímala con mucho amor a buscar ayuda ahora mismo, sin asustarla.
 Si el texto no tiene relación con orar o es ofensivo, responde igual con amor e invítala a hablar con Dios.
-Responde SOLO con JSON: {"need": "su situación en 2-5 palabras (específica, ej. 'Tu hijo lejos de casa')", "needId": "...", "message": "...", "verseId": "v..", "verseRef": "cita exacta del catálogo", "verseWhy": "...", "prayerId": "...", "crisis": false}`
+Responde SOLO con JSON: {"need": "su situación en 2-5 palabras (específica, ej. 'Tu hijo lejos de casa')", "needId": "...", "topicId": "...", "message": "...", "verseId": "v..", "verseRef": "cita exacta del catálogo", "verseWhy": "...", "prayerId": "...", "crisis": false}`
 
 function catalog() {
   // Citation + when-to-use only: the model knows these passages, and the site fills in the verified text.
   const v = verses.map((x) => `${x.id} | ${x.ref} | ${x.cuando}`).join("\n")
   const p = prayers.map((x) => `${x.id} | ${x.title} | ${x.theme}`).join("\n")
-  return `NECESIDADES (id | nombre):\n${needList}\n\nVERSÍCULOS RVR1960 (id | cita | cuándo usarlo [necesidades]):\n${v}\n\nORACIONES GUIADAS (id | título | tema):\n${p}`
+  return `NECESIDADES (id | nombre):\n${needList}\n\nTEMAS (id | nombre):\n${topicList}\n\nVERSÍCULOS RVR1960 (id | cita | cuándo usarlo [necesidades]):\n${v}\n\nORACIONES GUIADAS (id | título | tema):\n${p}`
 }
 
 /** Finds the OpenRouter key whatever exact name it was saved under. */
@@ -200,5 +206,6 @@ export async function answerPrayer(
     verseWhy: String(parsed.verseWhy || "").trim().slice(0, 240),
     prayer: { id: prayer.id, title: prayer.title },
     crisis: Boolean(parsed.crisis),
+    topicId: temas.some((t) => t.id === parsed.topicId) ? String(parsed.topicId) : "",
   }
 }

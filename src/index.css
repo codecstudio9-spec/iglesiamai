@@ -1414,3 +1414,7 @@ main:focus { outline: none; }
 .ministry-row img[src="/mai-servicio-equipo.jpg"] { object-position: 45% center; }
 .usher-photo { margin: 34px 0 0; overflow: hidden; border-radius: 4px; }
 .usher-photo img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+
+/* Pastors' photo on black: 20% smaller, anchored bottom-right so the top of their heads never gets cut */
+.hero-slides { background: #000; }
+.hero-slides img.is-shrunk { scale: .8; transform-origin: right bottom; }

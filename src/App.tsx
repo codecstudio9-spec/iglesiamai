@@ -279,7 +279,7 @@ function Navbar({ route }: { route: Route }) {
  */
 const heroSlides = [
   {
-    src: "/mai-hero-pastores.jpg", position: "78% center", seconds: 8, alt: "Los pastores de Iglesia MAI sentados juntos en una banca",
+    src: "/mai-hero-pastores.jpg", position: "78% center", seconds: 10, shrink: true, alt: "Los pastores de Iglesia MAI sentados juntos en una banca",
     kicker: "Un mensaje de nuestros pastores",
     title: "Bienvenido a MAI,", accent: "aquí tienes familia.",
     copy: "Dios nos llamó a abrir esta casa para ti. Ven como estás: juntos vamos a conocer Su amor y a caminar el propósito que Él tiene para tu vida.",
@@ -316,7 +316,7 @@ const heroSlides = [
   },
 ]
 
-/** Which slide is showing: photo and words change together (the pastors' welcome stays 8 s, the rest 5 s). */
+/** Which slide is showing: photo and words change together (the pastors' welcome stays 10 s, the rest 5 s). */
 function useHeroSlide() {
   const [active, setActive] = useState(0)
   useEffect(() => {
@@ -331,14 +331,14 @@ function useHeroSlide() {
   return active
 }
 
-/** Home hero: the photos cross-fade (8 s the pastors, 5 s the rest) with a slow zoom. */
+/** Home hero: the photos cross-fade (10 s the pastors, 5 s the rest) with a slow zoom. */
 function HeroSlides({ active }: { active: number }) {
   return (
     <div className="hero-slides">
       {heroSlides.map((slide, i) => (
         <img
           key={slide.src}
-          className={i === active ? "is-active" : ""}
+          className={`${i === active ? "is-active" : ""} ${slide.shrink ? "is-shrunk" : ""}`}
           src={slide.src}
           alt={i === active ? slide.alt : ""}
           aria-hidden={i !== active}

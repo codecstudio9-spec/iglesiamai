@@ -285,6 +285,12 @@ const heroSlides = [
     copy: "Un lugar para conocer a Dios, crecer en comunidad y vivir el propósito que Él tiene para ti.",
   },
   {
+    src: "/mai-servicio-equipo.jpg", position: "center 30%", wide: true, alt: "Equipo del Ministerio de Servicio de Iglesia MAI en el escenario",
+    kicker: "Ministerio de Servicio",
+    title: "Bienvenido a MAI,", accent: "esta también es tu casa.",
+    copy: "Cada domingo te esperamos en la puerta con una sonrisa y un abrazo. Llegues como llegues, aquí hay un lugar preparado para ti.",
+  },
+  {
     src: "/mai-hero-estad-quietos.jpg", position: "72% center", alt: "Pastor de Iglesia MAI predicando «Estad quietos»",
     kicker: "Estad quietos",
     title: "Detente un momento:", accent: "Dios está aquí.",
@@ -740,12 +746,12 @@ function HomePage() {
   const active = useHeroSlide()
   return (
     <>
-      <section className="hero hero--slides">
+      <section className={`hero hero--slides ${heroSlides[active].wide ? "hero--group" : ""}`}>
         <HeroSlides active={active} />
         <div className="hero-overlay" />
         <div className="hero-content">
           <h1 className="sr-only">Iglesia Cristiana MAI en Bogotá</h1>
-          {/* All four messages share one spot, so the buttons never jump when the words change */}
+          {/* All the messages share one spot, so the buttons never jump when the words change */}
           <div className="hero-texts" aria-live="off">
             {heroSlides.map((slide, i) => (
               <div key={slide.src} className={i === active ? "is-active" : ""} aria-hidden={i !== active}>
@@ -1234,7 +1240,7 @@ function MinistriesPage() {
       title: "Servicio",
       tag: "Ujieres",
       text: "Los ujieres son el primer abrazo de MAI: reciben a cada persona en la puerta, la acompañan a su lugar y cuidan que cada servicio fluya en orden y con amor.",
-      image: photos.embrace,
+      image: "/mai-servicio-equipo.jpg",
       usher: true,
     },
     {
@@ -1316,6 +1322,9 @@ function MinistriesPage() {
             Servir en la puerta es una forma hermosa de mostrar el amor de Dios. Si te gusta recibir
             a las personas, ayudar y que todo funcione con excelencia, este equipo es para ti.
           </p>
+          <figure className="usher-photo">
+            <img src="/mai-servicio-equipo.jpg" alt="Equipo de ujieres del Ministerio de Servicio de Iglesia MAI" loading="lazy" />
+          </figure>
           <ul className="usher-list">
             <li>Recibir con una sonrisa a cada persona que llega</li>
             <li>Acompañar a las visitas nuevas y ubicarlas</li>

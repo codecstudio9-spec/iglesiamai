@@ -1405,3 +1405,12 @@ main:focus { outline: none; }
 .offering-actions .button svg { width: 18px; }
 .offering-note { margin: 26px 0 0; color: var(--muted); font-size: 15px; line-height: 1.7; text-align: center; }
 @media (max-width: 420px) { .offering-row button span { display: none; } .offering-row button { padding: 0 13px; } }
+
+/* Hero slide with the whole Servicio team: keep the left darker only where the text sits */
+.hero--group .hero-overlay { background: linear-gradient(90deg, rgba(4,9,16,.9) 0%, rgba(4,9,16,.78) 24%, rgba(4,9,16,.42) 40%, rgba(4,9,16,.1) 54%, rgba(4,9,16,0) 64%), linear-gradient(0deg, rgba(4,9,16,.55), transparent 38%); }
+@media (max-width: 800px) {
+  .hero--group .hero-overlay { background: linear-gradient(0deg, rgba(6,13,23,.96) 0%, rgba(6,13,23,.9) 48%, rgba(6,13,23,.7) 64%, rgba(6,13,23,.3) 80%, rgba(6,13,23,.1) 100%); }
+}
+.ministry-row img[src="/mai-servicio-equipo.jpg"] { object-position: 45% center; }
+.usher-photo { margin: 34px 0 0; overflow: hidden; border-radius: 4px; }
+.usher-photo img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }

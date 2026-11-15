@@ -3,10 +3,12 @@ import "./admin.css"
 import WebInbox, { WebOverview, webPages } from "./AdminWebInbox"
 import AdminAnnouncements from "./AdminAnnouncements"
 import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn, signOut, staffName } from "./lib/auth"
+import { InviteRegistration, MyAccess, UsersPage } from "./AdminUsers"
+import { can, myAccess, type Permission, type StaffMember } from "./lib/staff"
 
 type AdminIcon = "home" | "people" | "team" | "calendar" | "school" | "target" | "wallet" | "expense" | "file" | "certificate" | "chart" | "bell" | "shield" | "settings" | "search" | "plus" | "arrow" | "check" | "clock" | "more" | "menu" | "close" | "upload" | "filter" | "download" | "eye" | "logout" | "globe"
 
-function AIcon({ name }: { name: AdminIcon }) {
+export function AIcon({ name }: { name: AdminIcon }) {
   const p: Record<AdminIcon, React.ReactNode> = {
     home: (
       <>
@@ -275,7 +277,43 @@ const nav = [
   { label: "Configuración", icon: "settings" as AdminIcon },
 ]
 
-function AdminLogo({ dark = false }: { dark?: boolean }) {
+/** Which permission opens each page (pages not listed: everyone on the team, or owner-only below). */
+const pagePermission: Record<string, Permission> = {
+  Personas: "personas",
+  "Sitio web": "solicitudes",
+  Anuncios: "anuncios",
+  "Mi equipo": "equipo",
+  Líderes: "equipo",
+  "Mis discípulos": "equipo",
+  Usuarios: "usuarios",
+  Invitaciones: "usuarios",
+  Encuentros: "encuentros",
+  "Universidad de la Vida": "universidad",
+  "Capacitación Destino": "capacitacion",
+  Pagos: "pagos",
+  Gastos: "gastos",
+  Documentos: "documentos",
+  Certificados: "documentos",
+  Reportes: "reportes",
+}
+const ownerOnlyPages = ["Auditoría", "Configuración"]
+
+export function canOpen(me: StaffMember | null, page: string) {
+  if (!me) return false
+  if (me.isOwner) return true
+  if (ownerOnlyPages.includes(page)) return false
+  if (page in webPages) return can(me, "solicitudes")
+  const perm = pagePermission[page]
+  return perm ? can(me, perm) : true
+}
+
+function accessLabel(me: StaffMember | null) {
+  if (!me) return "Equipo MAI"
+  if (me.isOwner) return "Acceso total"
+  return me.roleLabel || "Equipo MAI"
+}
+
+export function AdminLogo({ dark = false }: { dark?: boolean }) {
   return (
     <div className={`admin-logo ${dark ? "admin-logo-dark" : ""}`}>
       <img
@@ -910,7 +948,7 @@ function Dashboard({ go }: { go: (s: string) => void }) {
   )
 }
 
-function PanelTitle({
+export function PanelTitle({
   kicker,
   title,
   action,
@@ -937,7 +975,7 @@ function PanelTitle({
   )
 }
 
-function StatusPill({
+export function StatusPill({
   children,
   tone = "",
 }: {
@@ -1905,140 +1943,6 @@ function DocumentsPage({ certificates = false }: { certificates?: boolean }) {
   )
 }
 
-function InviteModal({ close }: { close: () => void }) {
-  const [generated, setGenerated] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const link = "https://mai.org/registro/8f72k2x9"
-  function copy() {
-    navigator.clipboard?.writeText(link)
-    setCopied(true)
-  }
-  return (
-    <div className="modal-layer">
-      <button className="modal-scrim" onClick={close} aria-label="Cerrar" />
-      <section className="invite-modal">
-        <header>
-          <div>
-            <span>Mi equipo · Invitaciones</span>
-            <h2>Invitar a MAI</h2>
-          </div>
-          <button onClick={close}>
-            <AIcon name="close" />
-          </button>
-        </header>
-        {!generated ? (
-          <>
-            <p className="modal-intro">
-              Prellena la información que conozcas. La persona podrá completar
-              sus datos y crear su propia contraseña de forma privada.
-            </p>
-            <div className="invite-fields">
-              <label>
-                Nombre <input placeholder="Nombre" />
-              </label>
-              <label>
-                Apellido <input placeholder="Apellido" />
-              </label>
-              <label className="field-full">
-                Correo <input type="email" placeholder="correo@ejemplo.com" />
-              </label>
-              <label>
-                Teléfono <input placeholder="+57" />
-              </label>
-              <label>
-                Rol inicial
-                <select defaultValue="Líder">
-                  <option>Líder</option>
-                  <option>Profesor</option>
-                  <option>Pastor</option>
-                  <option>Tesorería</option>
-                  <option>Consulta</option>
-                </select>
-              </label>
-              <label>
-                Expira
-                <select defaultValue="7 días">
-                  <option>24 horas</option>
-                  <option>7 días</option>
-                  <option>15 días</option>
-                  <option>30 días</option>
-                </select>
-              </label>
-              <label>
-                Máximo de registros
-                <input type="number" defaultValue="1" />
-              </label>
-            </div>
-            <div className="modal-security">
-              <AIcon name="shield" />
-              <p>
-                El enlace utilizará un token único no predecible. Crear la
-                cuenta no otorgará permisos hasta que sea aprobada.
-              </p>
-            </div>
-            <button
-              className="modal-primary"
-              onClick={() => setGenerated(true)}
-            >
-              Generar enlace de registro <AIcon name="arrow" />
-            </button>
-          </>
-        ) : (
-          <div className="generated-link">
-            <span className="generated-check">
-              <AIcon name="check" />
-            </span>
-            <h3>Enlace listo para compartir</h3>
-            <p>
-              Este enlace permitirá que la persona complete sus datos y cree su
-              contraseña.
-            </p>
-            <div className="link-box">
-              <span>{link}</span>
-              <button onClick={copy}>{copied ? "Copiado" : "Copiar"}</button>
-            </div>
-            <div className="share-actions">
-              <button>
-                <b>WA</b> WhatsApp
-              </button>
-              <button>
-                <b>@</b> Correo
-              </button>
-              <button>
-                <b>QR</b> Mostrar QR
-              </button>
-            </div>
-            <dl>
-              <div>
-                <dt>Estado</dt>
-                <dd>
-                  <StatusPill tone="pill-ok">Activo</StatusPill>
-                </dd>
-              </div>
-              <div>
-                <dt>Expira</dt>
-                <dd>16 julio 2026</dd>
-              </div>
-              <div>
-                <dt>Registros</dt>
-                <dd>0 / 1</dd>
-              </div>
-            </dl>
-            <button
-              className="preview-registration"
-              onClick={() => {
-                window.location.hash = "#/registro/8f72k2x9"
-              }}
-            >
-              Ver experiencia de registro <AIcon name="eye" />
-            </button>
-          </div>
-        )}
-      </section>
-    </div>
-  )
-}
-
 function PersonalLinkCard() {
   const [copied, setCopied] = useState(false)
   const link = "https://mai.org/inscripcion/k9x7m2c4"
@@ -2098,276 +2002,6 @@ function PersonalLinkCard() {
         <span>17 registros · Sin expiración</span>
       </div>
     </section>
-  )
-}
-
-function UsersPage({ invitations = false }: { invitations?: boolean }) {
-  const [invite, setInvite] = useState(false)
-  const [tab, setTab] = useState(invitations ? "Invitaciones" : "Todos")
-  const [approved, setApproved] = useState<number[]>([])
-  const tabs = [
-    "Todos",
-    "Administradores",
-    "Pastores",
-    "Líderes",
-    "Profesores",
-    "Discípulos",
-    "Invitaciones",
-  ]
-  const accounts = [
-    ["Daniela Rojas", "Super administrador", "Activo", 44, "Hoy, 8:42 AM"],
-    ["Carlos Andrés Rodríguez", "Líder", "Activo", 11, "Ayer, 6:15 PM"],
-    ["Laura Valentina Martínez", "Profesor", "Activo", 45, "08 jul, 9:20 AM"],
-    ["María Fernanda Gómez", "Líder", "Activo", 47, "08 jul, 7:05 AM"],
-    ["Andrés Moreno", "Pastor", "Activo", 14, "07 jul, 5:32 PM"],
-  ]
-  const inviteRows = [
-    ["Sofía Ramírez", "Profesor", "Pendiente", "09 jul 2026", "16 jul 2026"],
-    ["Miguel Ángel López", "Líder", "Aceptada", "07 jul 2026", "14 jul 2026"],
-    [
-      "Correo sin asignar",
-      "Consulta",
-      "Expirada",
-      "28 jun 2026",
-      "05 jul 2026",
-    ],
-  ]
-  return (
-    <>
-      <PageHeader
-        eyebrow="Identidad y acceso"
-        title={invitations ? "Invitaciones" : "Usuarios"}
-        copy="Cuentas, roles, relaciones y permisos de cada integrante de MAI."
-        primary="Invitar integrante"
-        onPrimary={() => setInvite(true)}
-      />
-      <section className="account-overview">
-        <div>
-          <span>Usuarios activos</span>
-          <strong>138</strong>
-          <small>7 roles configurados</small>
-        </div>
-        <div>
-          <span>Pendientes de aprobación</span>
-          <strong>12</strong>
-          <small>Requieren atención</small>
-        </div>
-        <div>
-          <span>Invitaciones vigentes</span>
-          <strong>8</strong>
-          <small>3 expiran esta semana</small>
-        </div>
-        <div>
-          <span>Enlaces personales</span>
-          <strong>46</strong>
-          <small>Líderes activos</small>
-        </div>
-      </section>
-      <section className="pending-approvals panel">
-        <PanelTitle
-          kicker="Acceso"
-          title="Solicitudes pendientes"
-          action="Ver las 12"
-        />
-        <div className="approval-cards">
-          {[
-            ["Carlos Rodríguez", "Líder", 11, "07 oct 2026"],
-            ["Natalia Herrera", "Profesor", 32, "08 oct 2026"],
-            ["Felipe Castro", "Consulta", 13, "09 oct 2026"],
-          ].map(([name, role, img, date], i) => (
-            <article
-              className={approved.includes(i) ? "approval-approved" : ""}
-              key={name as string}
-            >
-              <img src={avatar(img as number)} alt="" />
-              <div>
-                <StatusPill
-                  tone={approved.includes(i) ? "pill-ok" : "pill-warn"}
-                >
-                  {approved.includes(i)
-                    ? "Aprobada"
-                    : "Pendiente de aprobación"}
-                </StatusPill>
-                <h3>{name}</h3>
-                <p>
-                  Rol solicitado: {role} · {date}
-                </p>
-              </div>
-              {!approved.includes(i) && (
-                <div className="approval-actions">
-                  <button
-                    onClick={() => setApproved((current) => [...current, i])}
-                  >
-                    Aprobar
-                  </button>
-                  <button>Configurar permisos</button>
-                  <button>Rechazar</button>
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
-      <div className="account-tabs">
-        {tabs.map((item) => (
-          <button
-            className={tab === item ? "active" : ""}
-            onClick={() => setTab(item)}
-            key={item}
-          >
-            {item}
-            {item === "Invitaciones" && <span>8</span>}
-          </button>
-        ))}
-      </div>
-      {tab === "Invitaciones" ? (
-        <section className="panel table-panel">
-          <div className="table-tools">
-            <div className="admin-search">
-              <AIcon name="search" />
-              <input placeholder="Buscar invitación..." />
-            </div>
-            <button>
-              <AIcon name="filter" /> Estado
-            </button>
-          </div>
-          <div className="data-table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Persona invitada</th>
-                  <th>Rol propuesto</th>
-                  <th>Estado</th>
-                  <th>Creada</th>
-                  <th>Expira</th>
-                  <th>Generada por</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inviteRows.map((row) => (
-                  <tr key={row[0]}>
-                    <td>
-                      <strong>{row[0]}</strong>
-                      <small>
-                        Token ·•••{Math.floor(Math.random() * 9000 + 1000)}
-                      </small>
-                    </td>
-                    <td>{row[1]}</td>
-                    <td>
-                      <StatusPill
-                        tone={
-                          row[2] === "Aceptada"
-                            ? "pill-ok"
-                            : row[2] === "Pendiente"
-                              ? "pill-blue"
-                              : "pill-warn"
-                        }
-                      >
-                        {row[2]}
-                      </StatusPill>
-                    </td>
-                    <td>{row[3]}</td>
-                    <td>{row[4]}</td>
-                    <td>Daniela Rojas</td>
-                    <td>
-                      <div className="inline-actions">
-                        <button>Copiar</button>
-                        <button>Reenviar</button>
-                        <button>
-                          <AIcon name="more" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : (
-        <section className="panel table-panel">
-          <div className="table-tools">
-            <div className="admin-search">
-              <AIcon name="search" />
-              <input placeholder="Buscar usuario, correo o rol..." />
-            </div>
-            <button>
-              <AIcon name="filter" /> Filtros
-            </button>
-            <button>
-              <AIcon name="download" /> Exportar
-            </button>
-          </div>
-          <div className="data-table-wrap">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Rol</th>
-                  <th>Relación</th>
-                  <th>Permisos</th>
-                  <th>Último acceso</th>
-                  <th>Estado</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {accounts
-                  .filter(
-                    (row) =>
-                      tab === "Todos" ||
-                      row[1]
-                        .toLowerCase()
-                        .includes(tab.slice(0, -1).toLowerCase()),
-                  )
-                  .map((row, i) => (
-                    <tr key={row[0]}>
-                      <td>
-                        <div className="person-cell">
-                          <img src={avatar(row[3] as number)} alt="" />
-                          <p>
-                            <strong>{row[0]}</strong>
-                            <span>
-                              {String(row[0])
-                                .toLowerCase()
-                                .replaceAll(" ", ".")}
-                              @iglesiamai.co
-                            </span>
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <StatusPill tone="pill-blue">{row[1]}</StatusPill>
-                      </td>
-                      <td>
-                        {i === 1 || i === 3
-                          ? `${18 - i} discípulos`
-                          : i === 2
-                            ? "3 cursos"
-                            : "Equipo MAI"}
-                      </td>
-                      <td>
-                        {i === 0 ? "Acceso total" : `${14 + i * 3} permisos`}
-                      </td>
-                      <td>{row[4]}</td>
-                      <td>
-                        <StatusPill tone="pill-ok">{row[2]}</StatusPill>
-                      </td>
-                      <td>
-                        <button className="icon-more">
-                          <AIcon name="more" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-      {invite && <InviteModal close={() => setInvite(false)} />}
-    </>
   )
 }
 
@@ -2926,6 +2560,10 @@ function Sidebar({
   logout: () => void
 }) {
   const name = useContext(StaffName)
+  const me = useContext(MyAccess)
+  const items = nav
+    .map((item) => ({ ...item, children: item.children?.filter((c) => canOpen(me, c)) }))
+    .filter((item) => canOpen(me, item.label) || (item.children?.length ?? 0) > 0)
   return (
     <>
       <aside className={`admin-sidebar ${open ? "sidebar-open" : ""}`}>
@@ -2936,7 +2574,7 @@ function Sidebar({
           </button>
         </div>
         <nav>
-          {nav.map((item) => (
+          {items.map((item) => (
             <div key={item.label}>
               <button
                 className={page === item.label ? "active" : ""}
@@ -2949,7 +2587,7 @@ function Sidebar({
                 <span>{item.label}</span>
                 {item.label === "Notificaciones" && <b>5</b>}
               </button>
-              {item.children && (
+              {item.children && item.children.length > 0 && (
                 <div className="subnav">
                   {item.children.map((c) => (
                     <button
@@ -2972,7 +2610,7 @@ function Sidebar({
           <span className="user-initial">{name[0].toUpperCase()}</span>
           <div>
             <strong>{name}</strong>
-            <span>Acceso total</span>
+            <span>{accessLabel(me)}</span>
           </div>
           <button onClick={logout}>
             <AIcon name="logout" />
@@ -3000,6 +2638,7 @@ function AdminTopbar({
   go: (s: string) => void
 }) {
   const name = useContext(StaffName)
+  const me = useContext(MyAccess)
   return (
     <header className="admin-topbar">
       <button className="mobile-menu-btn" onClick={menu}>
@@ -3022,7 +2661,7 @@ function AdminTopbar({
           <span className="user-initial">{name[0].toUpperCase()}</span>
           <p>
             <strong>{name}</strong>
-            <span>Acceso total</span>
+            <span>{accessLabel(me)}</span>
           </p>
           <AIcon name="more" />
         </div>
@@ -3032,14 +2671,17 @@ function AdminTopbar({
   )
 }
 
-function MobileNav({ page, go }: { page: string; go: (s: string) => void }) {
-  const links: [string, AdminIcon][] = [
-    ["Dashboard", "home"],
-    ["Personas", "people"],
-    ["Encuentros", "calendar"],
-    ["Pagos", "wallet"],
-    ["Más", "more"],
-  ]
+function MobileNav({ page, go, more }: { page: string; go: (s: string) => void; more: () => void }) {
+  const me = useContext(MyAccess)
+  const links = (
+    [
+      ["Dashboard", "home"],
+      ["Personas", "people"],
+      ["Encuentros", "calendar"],
+      ["Pagos", "wallet"],
+      ["Más", "more"],
+    ] as [string, AdminIcon][]
+  ).filter(([label]) => label === "Más" || canOpen(me, label))
   return (
     <nav className="mobile-bottom-nav">
       {links.map(([label, icon]) => (
@@ -3050,7 +2692,7 @@ function MobileNav({ page, go }: { page: string; go: (s: string) => void }) {
               ? "active"
               : ""
           }
-          onClick={() => go(label === "Más" ? "Configuración" : label)}
+          onClick={() => (label === "Más" ? more() : go(label))}
           key={label}
         >
           <AIcon name={icon} />
@@ -3064,15 +2706,18 @@ function MobileNav({ page, go }: { page: string; go: (s: string) => void }) {
 export default function AdminApp({ onExit }: { onExit: () => void }) {
   const [logged, setLogged] = useState(false)
   const [name, setName] = useState("Equipo MAI")
+  const [me, setMe] = useState<StaffMember | null>(null)
   const [checking, setChecking] = useState(true)
   const [resetting] = useState(() => window.location.search.includes(RECOVERY_FLAG))
   useEffect(() => {
     // Reset links sign the person in first; they still have to choose a new password.
     if (resetting) return setChecking(false)
     currentStaff()
-      .then((user) => {
-        setLogged(Boolean(user))
-        if (user) setName(staffName(user))
+      .then(async (user) => {
+        const access = user ? await myAccess() : null
+        setMe(access)
+        setLogged(Boolean(user && access))
+        if (user) setName(access?.name || staffName(user))
       })
       .finally(() => setChecking(false))
   }, [resetting, logged])
@@ -3086,6 +2731,7 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
     return () => window.removeEventListener("hashchange", updateRoute)
   }, [])
   const content = useMemo(() => {
+    if (!canOpen(me, page)) return <Dashboard go={setPage} />
     if (personId)
       return <PersonProfile id={personId} back={() => setPersonId(null)} />
     if (page === "Dashboard") return <Dashboard go={setPage} />
@@ -3102,9 +2748,9 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
     if (page === "Usuarios") return <UsersPage />
     if (page === "Invitaciones") return <UsersPage invitations />
     return <GenericPage page={page} />
-  }, [page, personId])
+  }, [page, personId, me])
   if (route.startsWith("#/registro/")) {
-    return <RegistrationOnboarding onExit={onExit} />
+    return <InviteRegistration token={decodeURIComponent(route.slice("#/registro/".length).split(/[/?]/)[0])} onExit={onExit} />
   }
   if (route.startsWith("#/inscripcion/")) {
     return <RegistrationOnboarding disciple onExit={onExit} />
@@ -3124,6 +2770,7 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
   return (
+    <MyAccess.Provider value={me}>
     <StaffName.Provider value={name}>
     <main className="admin-app">
       <Sidebar
@@ -3131,14 +2778,15 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
         go={go}
         open={sidebar}
         close={() => setSidebar(false)}
-        logout={() => signOut().finally(() => setLogged(false))}
+        logout={() => signOut().finally(() => (setLogged(false), setMe(null)))}
       />
       <div className="admin-shell">
         <AdminTopbar page={page} menu={() => setSidebar(true)} go={go} />
         <div className="admin-content">{content}</div>
       </div>
-      <MobileNav page={page} go={go} />
+      <MobileNav page={page} go={go} more={() => setSidebar(true)} />
     </main>
     </StaffName.Provider>
+    </MyAccess.Provider>
   )
 }

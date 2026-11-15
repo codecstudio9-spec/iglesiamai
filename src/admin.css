@@ -597,3 +597,38 @@ img.cert-logo { width: auto; height: 34px; margin: 0 auto 8px; border: 0; border
 .login-submit:disabled { cursor: wait; opacity: .7; }
 
 @media (max-width: 900px) { .settings-grid { grid-template-columns: minmax(0,1fr); } }
+
+/* Real accounts: users, invitations and permissions (AdminUsers.tsx) */
+.user-avatar { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border-radius: 50%; background: #e8f2f2; color: var(--a-teal); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.approval-cards article > .user-avatar { width: 42px; height: 42px; }
+.account-overview-three { grid-template-columns: repeat(3,1fr); }
+.users-error { margin: 14px 0 0; padding: 11px 13px; background: #fbeeea; color: #a2452f; font-size: 13px; line-height: 1.5; }
+.users-empty { padding: 40px 24px; text-align: center; }
+.users-empty h2 { margin: 0 0 8px; font-family: var(--serif); font-size: 22px; font-weight: 400; }
+.users-empty p { margin: 0; color: var(--a-muted); font-size: 13px; }
+.share-actions-two { grid-template-columns: 1fr 1fr; }
+.share-actions a { display: flex; min-height: 43px; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--a-line); background: white; color: var(--a-muted); font-size: 12px; text-decoration: none; }
+.share-actions a:hover { border-color: var(--a-ink); color: var(--a-ink); }
+.access-modal { width: min(640px,100%); }
+.access-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; margin: 18px 0 6px; }
+.access-facts div { border-bottom: 1px solid var(--a-line); padding: 9px 0; }
+.access-facts dt { color: var(--a-muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.access-facts dd { margin: 3px 0 0; color: var(--a-text); font-size: 13px; overflow-wrap: anywhere; }
+.access-status { display: block; margin-top: 18px; color: var(--a-text); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.access-status select { display: block; width: 100%; min-height: 44px; margin-top: 7px; border: 1px solid var(--a-line); padding: 0 12px; background: #fafbfb; font-family: inherit; font-size: 13px; text-transform: none; }
+.access-title { margin: 22px 0 10px; font-family: var(--serif); font-size: 19px; }
+.access-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.access-grid label { display: flex; align-items: flex-start; gap: 10px; border: 1px solid var(--a-line); padding: 11px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+.access-grid label.is-on { border-color: var(--a-teal); background: #f1f8f8; }
+.access-grid label.is-disabled { cursor: not-allowed; opacity: .55; }
+.access-grid input { margin-top: 2px; accent-color: var(--a-teal); }
+.access-grid strong, .access-grid small { display: block; }
+.access-grid strong { color: var(--a-text); font-size: 13px; }
+.access-grid small { margin-top: 3px; color: var(--a-muted); font-size: 11px; line-height: 1.4; }
+.access-reject { display: block; margin: 14px auto 0; border: 0; border-bottom: 1px solid; padding: 4px 0; background: none; color: #a2452f; font-size: 12px; }
+.complete-mark-warn { background: #fbf1e4; color: #b07a2c; }
+.modal-primary:disabled, .onboarding-submit:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 700px) {
+  .access-grid, .access-facts { grid-template-columns: 1fr; }
+  .account-overview-three { grid-template-columns: 1fr; }
+}

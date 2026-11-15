@@ -11,15 +11,16 @@ export const RECOVERY_FLAG = "acceso=recuperar"
 
 const STAFF_EMAIL_DOMAIN = "iglesiamai.com"
 
-async function isStaff(userId: string) {
-  const { data } = await supabase.from("staff").select("user_id").eq("user_id", userId).maybeSingle()
-  return Boolean(data)
+/** The person's account status on the team, or null if they are not on it. */
+async function staffStatus(userId: string): Promise<string | null> {
+  const { data } = await supabase.from("staff").select("status").eq("user_id", userId).maybeSingle()
+  return data ? ((data as { status?: string }).status ?? "activo") : null
 }
 
 export async function currentStaff() {
   const { data } = await supabase.auth.getSession()
   const user = data.session?.user
-  return user && (await isStaff(user.id)) ? user : null
+  return user && (await staffStatus(user.id)) === "activo" ? user : null
 }
 
 /** Staff may type a short username ("Admin"); Supabase Auth signs in by email. */
@@ -31,9 +32,16 @@ function toEmail(login: string) {
 export async function signIn(login: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email: toEmail(login), password })
   if (error || !data.user) throw new Error("Usuario o contraseña incorrectos.")
-  if (!(await isStaff(data.user.id))) {
+  const status = await staffStatus(data.user.id)
+  if (status !== "activo") {
     await supabase.auth.signOut()
-    throw new Error("Tu cuenta no tiene acceso al panel. Pide a un administrador que te habilite.")
+    throw new Error(
+      status === "pendiente"
+        ? "Tu cuenta está pendiente de aprobación. Te avisaremos cuando un administrador te dé acceso."
+        : status === "suspendido" || status === "rechazado"
+          ? "Tu cuenta no está activa. Habla con el administrador de MAI."
+          : "Tu cuenta no tiene acceso al panel. Pide a un administrador que te habilite.",
+    )
   }
   return data.user
 }

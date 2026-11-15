@@ -20,6 +20,8 @@ export type IconName =
   | "youtube"
   | "volume"
   | "mute"
+  | "copy"
+  | "gift"
 
 export default function Icon({ name }: { name: IconName }) {
   const paths: Record<IconName, React.ReactNode> = {
@@ -104,6 +106,19 @@ export default function Icon({ name }: { name: IconName }) {
       </>
     ),
     check: <path d="m5 12 4.5 4.5L19 7" />,
+    copy: (
+      <>
+        <rect x="9" y="9" width="11" height="11" rx="2" />
+        <path d="M5 15V6a2 2 0 0 1 2-2h8" />
+      </>
+    ),
+    gift: (
+      <>
+        <rect x="3.5" y="8" width="17" height="4" rx="1" />
+        <path d="M5 12v8h14v-8M12 8v12" />
+        <path d="M12 8S10.5 4 8 4a2 2 0 0 0 0 4M12 8s1.5-4 4-4a2 2 0 0 1 0 4" />
+      </>
+    ),
     tiktok: <path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.4 2.8 2.2 4.6 5 5" />,
     facebook: <path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V10H6.5v3.5H9V21h3.5v-7.5H15l.5-3.5h-3V7a1 1 0 0 1 1-1H15V3Z" />,
     volume: (

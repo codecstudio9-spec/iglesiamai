@@ -227,9 +227,9 @@ function Navbar({ route }: { route: Route }) {
                   {p.label}
                 </a>
               )
-              return p.route === "mensajes"
-                ? [link, <button key="oracion" onClick={() => openWidget("oracion")}>Necesito oración</button>]
-                : [link]
+              if (p.route === "mensajes") return [link, <button key="oracion" onClick={() => openWidget("oracion")}>Necesito oración</button>]
+              if (p.route === "contacto") return [link, <button key="ofrenda" className="nav-offering" onClick={() => openWidget("ofrenda")}>Ofrenda de amor</button>]
+              return [link]
             })}
         </div>
         <div className="nav-actions">
@@ -259,6 +259,9 @@ function Navbar({ route }: { route: Route }) {
               {p.label}
             </a>
           ))}
+          <button className="mobile-menu-offering" onClick={() => { setOpen(false); openWidget("ofrenda") }}>
+            Ofrenda de amor
+          </button>
         </div>
         <div className="mobile-menu-footer">
           <p>Domingos 8:00 y 10:00 AM</p>

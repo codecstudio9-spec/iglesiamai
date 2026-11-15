@@ -4,7 +4,7 @@ import PrayerMoment from "./PrayerMoment"
 import { moodIntro, moods, randomWord, wordOfTheDay, type Mood, type Word } from "../palabra"
 import { BACKEND_CONNECTED, saveSubmission } from "../lib/submissions"
 
-export type WidgetName = "palabra" | "oracion" | "visita" | "momento" | "jesus"
+export type WidgetName = "palabra" | "oracion" | "visita" | "momento" | "jesus" | "ofrenda"
 
 /** Opens one of the floating widgets from anywhere on the site. */
 export function openWidget(name: WidgetName) {
@@ -425,6 +425,107 @@ function VisitSheet({ onClose }: { onClose: () => void }) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Ofrenda de amor                                                     */
+/* ------------------------------------------------------------------ */
+
+const OFFERING = [
+  { label: "Titular", value: "Iglesia Cristiana MAI" },
+  { label: "Banco", value: "Davivienda" },
+  { label: "Cuenta de ahorros", value: "003900109319", mono: true },
+  { label: "NIT", value: "900.332.947-9", copy: "9003329479", mono: true },
+]
+
+function CopyRow({ label, value, copy, mono }: { label: string; value: string; copy?: string; mono?: boolean }) {
+  const [copied, setCopied] = useState(false)
+  async function onCopy() {
+    const text = copy ?? value
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      const area = document.createElement("textarea")
+      area.value = text
+      area.setAttribute("readonly", "")
+      area.style.position = "fixed"
+      area.style.opacity = "0"
+      document.body.appendChild(area)
+      area.select()
+      document.execCommand("copy")
+      area.remove()
+    }
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
+  }
+  return (
+    <div className="offering-row">
+      <div>
+        <span>{label}</span>
+        <strong className={mono ? "is-mono" : ""}>{value}</strong>
+      </div>
+      <button type="button" className={copied ? "is-copied" : ""} onClick={onCopy} aria-label={`Copiar ${label.toLowerCase()}`}>
+        <Icon name={copied ? "check" : "copy"} />
+        <span aria-live="polite">{copied ? "Copiado" : "Copiar"}</span>
+      </button>
+    </div>
+  )
+}
+
+function OfferingSheet({ onClose }: { onClose: () => void }) {
+  const allText = `Ofrenda de amor · Iglesia Cristiana MAI\nBanco Davivienda\nCuenta de ahorros: 003900109319\nNIT: 900.332.947-9`
+  return (
+    <Sheet
+      kicker="Donaciones"
+      title="Ofrenda de amor"
+      intro="Tu generosidad sostiene el ministerio y extiende la obra a más corazones, para que más personas conozcan el reino de Dios."
+      cover="/mai-adoracion-sala.jpg"
+      onClose={onClose}
+    >
+      <blockquote className="word-verse">
+        <span aria-hidden="true">“</span>
+        <p>Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.</p>
+        <cite>2 Corintios 9:7 · RVR1960</cite>
+      </blockquote>
+
+      <p className="eyebrow">Única cuenta oficial</p>
+      <div className="offering-card">
+        {OFFERING.map((row) => (
+          <CopyRow key={row.label} {...row} />
+        ))}
+      </div>
+      <CopyAll text={allText} />
+      <p className="offering-note">
+        Gracias por sembrar en esta casa. Cada ofrenda se convierte en reuniones, alcance y cuidado para
+        las personas que Dios trae a MAI.
+      </p>
+    </Sheet>
+  )
+}
+
+function CopyAll({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <div className="word-actions offering-actions">
+      <button
+        className="button button-primary"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text)
+            setCopied(true)
+            window.setTimeout(() => setCopied(false), 1800)
+          } catch {
+            // Each row still has its own copy button.
+          }
+        }}
+      >
+        {copied ? "Datos copiados" : "Copiar todos los datos"} <Icon name={copied ? "check" : "copy"} />
+      </button>
+      <a className="button button-ghost" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">
+        Compartir <Icon name="share" />
+      </a>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* Floating buttons                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -432,7 +533,7 @@ type FabPos = { side: "left" | "right"; bottom: number }
 const FAB_POS_KEY = "mai.fab.pos"
 const FAB_HINT_KEY = "mai.fab.hint"
 /** Space kept above the "+" so the opened menu always fits on screen. */
-const FAB_MENU_ROOM = 340
+const FAB_MENU_ROOM = 404
 
 function readFabPos(): FabPos | null {
   try {
@@ -589,6 +690,10 @@ export default function FloatingActions() {
         style={placement}
       >
         <div className="fab-menu" id="fab-menu" role="group" aria-label="Accesos rápidos">
+          <button className="fab-item" onClick={() => pick("ofrenda")}>
+            <Icon name="gift" />
+            <span>Donaciones</span>
+          </button>
           <button className="fab-item" onClick={() => pick("visita")}>
             <Icon name="users" />
             <span>Quiero que me inviten</span>
@@ -615,7 +720,7 @@ export default function FloatingActions() {
           onPointerCancel={onPointerUp}
           aria-expanded={expanded}
           aria-controls="fab-menu"
-          aria-label={expanded ? "Cerrar accesos rápidos" : "Abrir accesos rápidos: palabra de hoy, oración e invitación"}
+          aria-label={expanded ? "Cerrar accesos rápidos" : "Abrir accesos rápidos: palabra de hoy, oración, invitación y donaciones"}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 4v16M4 12h16" />
@@ -630,6 +735,7 @@ export default function FloatingActions() {
       {open === "palabra" && <WordSheet onClose={close} onPrayer={toPrayer} />}
       {open === "oracion" && <PrayerSheet onClose={close} />}
       {open === "visita" && <VisitSheet onClose={close} />}
+      {open === "ofrenda" && <OfferingSheet onClose={close} />}
       {(open === "momento" || open === "jesus") && (
         <PrayerMoment
           onClose={close}

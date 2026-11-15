@@ -1386,3 +1386,22 @@ main:focus { outline: none; }
 @media (max-width: 800px) {
   .hero .hero-title { font-size: clamp(38px, 10.5vw, 54px); }
 }
+
+/* Ofrenda de amor */
+.nav-links .nav-offering { color: inherit; }
+.nav-links .nav-offering::before { display: inline-block; width: 6px; height: 6px; margin: 0 8px 2px 0; border-radius: 50%; background: var(--warm); content: ""; }
+.mobile-menu-offering { align-self: flex-start; margin-top: 18px; padding: 12px 22px; border: 1px solid var(--warm); border-radius: 999px; background: var(--warm); color: var(--white); font-size: 17px; font-weight: 600; cursor: pointer; }
+.offering-card { margin: 12px 0 0; border: 1px solid var(--line); background: var(--white); }
+.offering-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; }
+.offering-row + .offering-row { border-top: 1px solid var(--line); }
+.offering-row > div { min-width: 0; }
+.offering-row > div span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.offering-row strong { display: block; color: var(--ink); font-size: 19px; font-weight: 600; overflow-wrap: anywhere; }
+.offering-row strong.is-mono { font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.offering-row button { display: inline-flex; flex: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.offering-row button svg { width: 17px; }
+.offering-row button:hover { border-color: var(--ink); background: var(--ink); color: var(--white); }
+.offering-row button.is-copied { border-color: var(--warm); background: var(--warm); color: var(--white); }
+.offering-actions .button svg { width: 18px; }
+.offering-note { margin: 26px 0 0; color: var(--muted); font-size: 15px; line-height: 1.7; text-align: center; }
+@media (max-width: 420px) { .offering-row button span { display: none; } .offering-row button { padding: 0 13px; } }

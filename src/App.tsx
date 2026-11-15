@@ -279,6 +279,12 @@ function Navbar({ route }: { route: Route }) {
  */
 const heroSlides = [
   {
+    src: "/mai-hero-pastores.jpg", position: "78% center", seconds: 8, alt: "Los pastores de Iglesia MAI sentados juntos en una banca",
+    kicker: "Un mensaje de nuestros pastores",
+    title: "Bienvenido a MAI,", accent: "aquí tienes familia.",
+    copy: "Dios nos llamó a abrir esta casa para ti. Ven como estás: juntos vamos a conocer Su amor y a caminar el propósito que Él tiene para tu vida.",
+  },
+  {
     src: "/mai-hero-adoracion.jpg", position: "74% center", alt: "Predicador de Iglesia MAI adorando con la mano en alto",
     kicker: "Iglesia MAI · Bogotá",
     title: "Extendiendo el reino de Dios,", accent: "un corazón a la vez.",
@@ -287,8 +293,8 @@ const heroSlides = [
   {
     src: "/mai-servicio-equipo.jpg", position: "center 30%", wide: true, alt: "Equipo del Ministerio de Servicio de Iglesia MAI en el escenario",
     kicker: "Ministerio de Servicio",
-    title: "Bienvenido a MAI,", accent: "esta también es tu casa.",
-    copy: "Cada domingo te esperamos en la puerta con una sonrisa y un abrazo. Llegues como llegues, aquí hay un lugar preparado para ti.",
+    title: "Servimos con alegría,", accent: "te recibimos con amor.",
+    copy: "Cada domingo nuestro equipo te espera en la puerta con una sonrisa y un abrazo, para acompañarte a tu lugar.",
   },
   {
     src: "/mai-hero-estad-quietos.jpg", position: "72% center", alt: "Pastor de Iglesia MAI predicando «Estad quietos»",
@@ -310,19 +316,22 @@ const heroSlides = [
   },
 ]
 
-/** Which slide is showing: photo and words change together every 7 seconds. */
+/** Which slide is showing: photo and words change together (the pastors' welcome stays 8 s, the rest 5 s). */
 function useHeroSlide() {
   const [active, setActive] = useState(0)
   useEffect(() => {
-    const id = window.setInterval(() => {
-      if (!document.hidden) setActive((i) => (i + 1) % heroSlides.length)
-    }, 7000)
-    return () => window.clearInterval(id)
-  }, [])
+    const seconds = heroSlides[active].seconds ?? 5
+    const id = window.setTimeout(function next() {
+      // A hidden tab keeps the slide until the person comes back.
+      if (document.hidden) return document.addEventListener("visibilitychange", next, { once: true })
+      setActive((i) => (i + 1) % heroSlides.length)
+    }, seconds * 1000)
+    return () => window.clearTimeout(id)
+  }, [active])
   return active
 }
 
-/** Home hero: the photos cross-fade every 7 seconds with a slow zoom. */
+/** Home hero: the photos cross-fade (8 s the pastors, 5 s the rest) with a slow zoom. */
 function HeroSlides({ active }: { active: number }) {
   return (
     <div className="hero-slides">

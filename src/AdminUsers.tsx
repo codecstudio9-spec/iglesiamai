@@ -4,6 +4,8 @@
  */
 import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react"
 import { AdminLogo, AIcon, PanelTitle, StatusPill } from "./AdminApp"
+import { blobToDataUrl, preparePhoto } from "./lib/people"
+import { SettingsContext } from "./lib/settings"
 import {
   acceptInvitation,
   can,
@@ -98,7 +100,8 @@ function InviteModal({ close }: { close: () => void }) {
   const [error, setError] = useState("")
   const [sending, setSending] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [days, setDays] = useState(7)
+  const settings = useContext(SettingsContext)
+  const [days, setDays] = useState(settings.general.inviteDays || 7)
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -254,7 +257,13 @@ function AccessModal({ person, close }: { person: StaffMember; close: () => void
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
 
+  const settings = useContext(SettingsContext)
   const locked = person.isOwner || person.userId === me?.userId || (!meIsOwner && person.permissions.includes("usuarios"))
+  function applyRole(id: string) {
+    const role = settings.roles.find((r) => r.id === id)
+    if (!role) return
+    setPerms((p) => [...role.permissions.filter((x) => x !== "usuarios"), ...(p.includes("usuarios") ? (["usuarios"] as Permission[]) : [])])
+  }
 
   function toggle(id: Permission) {
     setPerms((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
@@ -323,6 +332,17 @@ function AccessModal({ person, close }: { person: StaffMember; close: () => void
                 <option value="activo">Activo: puede entrar</option>
                 <option value="suspendido">Suspendido: no puede entrar</option>
                 {person.status === "pendiente" && <option value="pendiente">Pendiente de aprobación</option>}
+              </select>
+            </label>
+            <label className="access-status">
+              Marcar los permisos de un rol
+              <select value="" onChange={(e) => applyRole(e.target.value)}>
+                <option value="">Elegir rol…</option>
+                {settings.roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
               </select>
             </label>
             <p className="access-title">¿Qué puede ver y hacer?</p>
@@ -493,7 +513,10 @@ export function UsersPage({ invitations = false }: { invitations?: boolean }) {
                           <strong>{inv.name || "Sin nombre"}</strong>
                           <small>{inv.email || inv.phone || "—"}</small>
                         </td>
-                        <td>{inv.roleLabel || "—"}</td>
+                        <td>
+                          {inv.roleLabel || "—"}
+                          {inv.kind === "lider" && <small>Se activa sola</small>}
+                        </td>
                         <td>
                           <StatusPill tone={tone}>{label}</StatusPill>
                         </td>
@@ -585,6 +608,20 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
   const [error, setError] = useState("")
   const [sending, setSending] = useState(false)
   const [done, setDone] = useState("")
+  const [active, setActive] = useState(false)
+  const [photo, setPhoto] = useState<{ blob: Blob; url: string } | null>(null)
+  const [photoError, setPhotoError] = useState("")
+
+  async function pickPhoto(file?: File) {
+    if (!file) return
+    setPhotoError("")
+    try {
+      const blob = await preparePhoto(file)
+      setPhoto({ blob, url: URL.createObjectURL(blob) })
+    } catch (err) {
+      setPhotoError((err as Error).message)
+    }
+  }
 
   useEffect(() => {
     readInvitation(token)
@@ -604,7 +641,7 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
     if (password !== f.get("confirm")) return setError("Las contraseñas no coinciden.")
     setSending(true)
     try {
-      await acceptInvitation({
+      const result = await acceptInvitation({
         token,
         name: String(f.get("name") || ""),
         docType: String(f.get("docType") || ""),
@@ -615,7 +652,9 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
         email: String(f.get("email") || ""),
         username,
         password,
+        ...(photo ? { photo: await blobToDataUrl(photo.blob) } : {}),
       })
+      setActive(result.active)
       setDone(username)
       window.scrollTo({ top: 0 })
     } catch (err) {
@@ -633,14 +672,25 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
           <span className={done ? "complete-mark" : "complete-mark complete-mark-warn"}>
             <AIcon name={done ? "check" : "shield"} />
           </span>
-          <p className="onboarding-kicker">{done ? "Registro recibido" : "Invitación"}</p>
-          <h1>{done ? "Tu cuenta fue creada." : "Este enlace no está disponible."}</h1>
+          <p className="onboarding-kicker">{done ? (active ? "Cuenta activa" : "Registro recibido") : "Invitación"}</p>
+          <h1>{done ? (active ? "¡Bienvenido al equipo!" : "Tu cuenta fue creada.") : "Este enlace no está disponible."}</h1>
           <p>
             {done
-              ? `Tu usuario es “${done}”. Un administrador revisará tus datos y te dará los permisos que necesitas. Cuando estés aprobado podrás entrar con tu usuario y contraseña.`
+              ? active
+                ? `Tu usuario es “${done}”. Tu cuenta ya está activa: entra ahora con tu usuario y contraseña.`
+                : `Tu usuario es “${done}”. Un administrador revisará tus datos y te dará los permisos que necesitas. Cuando estés aprobado podrás entrar con tu usuario y contraseña.`
               : invalid}
           </p>
-          {done && (
+          {done && active && (
+            <button
+              onClick={() => {
+                window.location.hash = "#/admin"
+              }}
+            >
+              Entrar a la plataforma
+            </button>
+          )}
+          {done && !active && (
             <>
               <div className="approval-flow">
                 <span className="done">1</span>
@@ -683,9 +733,20 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
         <div className="onboarding-heading">
           <p className="onboarding-kicker">Invitación personal{invite.roleLabel ? ` · ${invite.roleLabel}` : ""}</p>
           <h1>{firstName ? `Bienvenido, ${firstName}` : "Bienvenido a MAI"}</h1>
-          <span>Completa tus datos y crea tu usuario y contraseña para entrar a la gestión interna de Iglesia MAI.</span>
+          <span>
+            Completa tus datos y crea tu usuario y contraseña para entrar a la gestión interna de Iglesia MAI.
+            {invite.kind === "lider" ? " Tu cuenta de líder queda activa apenas termines." : ""}
+          </span>
         </div>
         <form className="onboarding-form" onSubmit={submit}>
+          <div className="photo-upload">
+            <div>{photo ? <img src={photo.url} alt="Vista previa" /> : <AIcon name="people" />}</div>
+            <label>
+              Tu foto de perfil
+              <span>{photoError || (photo ? "Toca para cambiarla" : "Opcional · desde la galería o la cámara")}</span>
+              <input type="file" accept="image/*" onChange={(e) => pickPhoto(e.target.files?.[0])} />
+            </label>
+          </div>
           <div className="form-section-title">
             <span>01</span>
             <p>Información personal</p>

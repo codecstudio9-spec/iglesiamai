@@ -1,12 +1,15 @@
-import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, FormEvent, useContext, useEffect, useState } from "react"
 import "./admin.css"
 import WebInbox, { WebOverview, webPages } from "./AdminWebInbox"
 import AdminAnnouncements from "./AdminAnnouncements"
 import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn, signOut, staffName } from "./lib/auth"
 import { InviteRegistration, MyAccess, UsersPage } from "./AdminUsers"
+import { ComingSoon, Dashboard, DiscipleSignup, NotificationsPage, PeoplePage, PersonProfile, ProgramPage, TeamPage, useAlerts } from "./AdminPeople"
+import SettingsPage from "./AdminSettings"
+import { SettingsContext, useSettings } from "./lib/settings"
 import { can, myAccess, type Permission, type StaffMember } from "./lib/staff"
 
-type AdminIcon = "home" | "people" | "team" | "calendar" | "school" | "target" | "wallet" | "expense" | "file" | "certificate" | "chart" | "bell" | "shield" | "settings" | "search" | "plus" | "arrow" | "check" | "clock" | "more" | "menu" | "close" | "upload" | "filter" | "download" | "eye" | "logout" | "globe"
+export type AdminIcon = "home" | "people" | "team" | "calendar" | "school" | "target" | "wallet" | "expense" | "file" | "certificate" | "chart" | "bell" | "shield" | "settings" | "search" | "plus" | "arrow" | "check" | "clock" | "more" | "menu" | "close" | "upload" | "filter" | "download" | "eye" | "logout" | "globe"
 
 export function AIcon({ name }: { name: AdminIcon }) {
   const p: Record<AdminIcon, React.ReactNode> = {
@@ -186,71 +189,6 @@ export function AIcon({ name }: { name: AdminIcon }) {
 /** Name of whoever is signed in, for the greeting and the user badges. */
 const StaffName = createContext("Equipo MAI")
 
-const avatar = (id: number) => `https://i.pravatar.cc/160?img=${id}`
-
-const people = [
-  {
-    id: 1,
-    name: "Juan David Pérez",
-    role: "Discípulo",
-    leader: "Andrés Moreno",
-    stage: "Universidad",
-    status: "Activo",
-    phone: "310 452 8190",
-    progress: 72,
-    img: avatar(12),
-    payment: "Parcial",
-  },
-  {
-    id: 2,
-    name: "María Fernanda Gómez",
-    role: "Líder",
-    leader: "Laura Martínez",
-    stage: "Destino",
-    status: "Activo",
-    phone: "315 801 2247",
-    progress: 91,
-    img: avatar(47),
-    payment: "Al día",
-  },
-  {
-    id: 3,
-    name: "Carlos Andrés Rodríguez",
-    role: "Estudiante",
-    leader: "Daniel Rojas",
-    stage: "Encuentro",
-    status: "Nuevo",
-    phone: "300 772 1834",
-    progress: 38,
-    img: avatar(11),
-    payment: "Pendiente",
-  },
-  {
-    id: 4,
-    name: "Laura Valentina Martínez",
-    role: "Profesora",
-    leader: "Pastor MAI",
-    stage: "Graduado",
-    status: "Activo",
-    phone: "320 113 5098",
-    progress: 100,
-    img: avatar(45),
-    payment: "Al día",
-  },
-  {
-    id: 5,
-    name: "Samuel Esteban Torres",
-    role: "Discípulo",
-    leader: "María Gómez",
-    stage: "Pre-encuentro",
-    status: "Activo",
-    phone: "301 550 1248",
-    progress: 24,
-    img: avatar(15),
-    payment: "Parcial",
-  },
-]
-
 const nav = [
   { label: "Dashboard", icon: "home" as AdminIcon },
   { label: "Personas", icon: "people" as AdminIcon },
@@ -265,7 +203,7 @@ const nav = [
     children: ["Usuarios", "Líderes", "Mis discípulos", "Invitaciones"],
   },
   { label: "Encuentros", icon: "calendar" as AdminIcon },
-  { label: "Universidad de la Vida", icon: "school" as AdminIcon },
+  { label: "Misión 180", icon: "school" as AdminIcon },
   { label: "Capacitación Destino", icon: "target" as AdminIcon },
   { label: "Pagos", icon: "wallet" as AdminIcon },
   { label: "Gastos", icon: "expense" as AdminIcon },
@@ -288,7 +226,7 @@ const pagePermission: Record<string, Permission> = {
   Usuarios: "usuarios",
   Invitaciones: "usuarios",
   Encuentros: "encuentros",
-  "Universidad de la Vida": "universidad",
+  "Misión 180": "universidad",
   "Capacitación Destino": "capacitacion",
   Pagos: "pagos",
   Gastos: "gastos",
@@ -512,442 +450,6 @@ function Login({
   )
 }
 
-function RegistrationOnboarding({
-  disciple = false,
-  onExit,
-}: {
-  disciple?: boolean
-  onExit: () => void
-}) {
-  const [complete, setComplete] = useState(false)
-  const [photo, setPhoto] = useState(false)
-  function submit(e: FormEvent) {
-    e.preventDefault()
-    setComplete(true)
-  }
-  if (complete) {
-    return (
-      <main className="onboarding-page">
-        <section className="onboarding-card onboarding-complete">
-          <AdminLogo dark />
-          <span className="complete-mark">
-            <AIcon name="check" />
-          </span>
-          <p className="onboarding-kicker">Registro recibido</p>
-          <h1>
-            {disciple ? "Tu proceso comienza aquí." : "Tu cuenta fue creada."}
-          </h1>
-          <p>
-            {disciple
-              ? "Carlos Rodríguez recibirá tu solicitud y podrá acompañarte en tus próximos pasos en MAI."
-              : "Tu acceso está pendiente de autorización. Un administrador asignará tu rol y permisos antes de activar la cuenta."}
-          </p>
-          <div className="approval-flow">
-            <span className="done">1</span>
-            <i />
-            <span className="done">2</span>
-            <i />
-            <span>3</span>
-          </div>
-          <div className="approval-labels">
-            <span>Datos</span>
-            <span>Cuenta</span>
-            <span>Aprobación</span>
-          </div>
-          <button onClick={onExit}>Volver a Iglesia MAI</button>
-        </section>
-      </main>
-    )
-  }
-  return (
-    <main className="onboarding-page">
-      <div className="onboarding-top">
-        <AdminLogo dark />
-        <button onClick={onExit}>Salir</button>
-      </div>
-      <section className="onboarding-card">
-        <div className="onboarding-heading">
-          <p className="onboarding-kicker">
-            {disciple
-              ? "Invitación personal · Carlos Rodríguez"
-              : "Registro de integrante"}
-          </p>
-          <h1>{disciple ? "Inicia tu proceso en MAI" : "Bienvenido a MAI"}</h1>
-          <span>
-            {disciple
-              ? "Completa tus datos para ser parte del equipo de Carlos Rodríguez."
-              : "Completa tus datos para crear tu acceso."}
-          </span>
-        </div>
-        <form className="onboarding-form" onSubmit={submit}>
-          <div className="photo-upload">
-            <div>
-              {photo ? (
-                <img src={avatar(33)} alt="Vista previa" />
-              ) : (
-                <AIcon name="people" />
-              )}
-            </div>
-            <label>
-              Foto de perfil
-              <span>JPG o PNG · Máximo 5 MB</span>
-              <input
-                type="file"
-                accept="image/*"
-                capture="user"
-                onChange={() => setPhoto(true)}
-              />
-            </label>
-          </div>
-          <div className="form-section-title">
-            <span>01</span>
-            <p>Información personal</p>
-          </div>
-          <div className="onboarding-fields">
-            <label className="field-full">
-              Nombre completo
-              <input required placeholder="Escribe tu nombre y apellidos" />
-            </label>
-            <label>
-              Tipo de documento
-              <select required defaultValue="CC">
-                <option value="CC">Cédula de ciudadanía</option>
-                <option value="CE">Cédula de extranjería</option>
-                <option value="TI">Tarjeta de identidad</option>
-                <option value="PA">Pasaporte</option>
-              </select>
-            </label>
-            <label>
-              Número de documento
-              <input required placeholder="Sin puntos ni espacios" />
-            </label>
-            <label>
-              Fecha de nacimiento
-              <input required type="date" />
-            </label>
-            <label>
-              Teléfono
-              <input required type="tel" placeholder="+57 300 000 0000" />
-            </label>
-            <label className="field-full">
-              Dirección
-              <input required placeholder="Dirección de residencia" />
-            </label>
-            {disciple && (
-              <label className="field-full">
-                Contacto de emergencia
-                <input placeholder="Nombre y teléfono" />
-              </label>
-            )}
-          </div>
-          <div className="form-section-title">
-            <span>02</span>
-            <p>{disciple ? "Información de contacto" : "Crea tu acceso"}</p>
-          </div>
-          <div className="onboarding-fields">
-            <label className={disciple ? "field-full" : ""}>
-              Correo electrónico
-              <input required type="email" placeholder="tu@correo.com" />
-            </label>
-            {!disciple && (
-              <>
-                <label>
-                  Usuario
-                  <input required placeholder="Elige tu usuario" />
-                  <small>Este será tu identificador de acceso.</small>
-                </label>
-                <label>
-                  Contraseña
-                  <input
-                    required
-                    type="password"
-                    placeholder="Mínimo 8 caracteres"
-                  />
-                </label>
-                <label>
-                  Confirmar contraseña
-                  <input
-                    required
-                    type="password"
-                    placeholder="Repite tu contraseña"
-                  />
-                </label>
-              </>
-            )}
-            {disciple && (
-              <label className="field-full">
-                Información adicional
-                <textarea
-                  rows={3}
-                  placeholder="¿Hay algo que debamos saber para acompañarte mejor?"
-                />
-              </label>
-            )}
-          </div>
-          <label className="data-consent">
-            <input required type="checkbox" />
-            <span>
-              Acepto el tratamiento de mis datos personales según la política de
-              privacidad de Iglesia MAI.
-            </span>
-          </label>
-          <button className="onboarding-submit" type="submit">
-            {disciple ? "Enviar inscripción" : "Crear mi cuenta"}
-            <AIcon name="arrow" />
-          </button>
-          {!disciple && (
-            <p className="password-note">
-              <AIcon name="shield" /> Tu contraseña es privada. Ningún
-              administrador puede verla.
-            </p>
-          )}
-        </form>
-      </section>
-      <footer className="onboarding-footer">
-        Iglesia MAI · Bogotá, Colombia
-      </footer>
-    </main>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  change,
-  tone = "",
-}: {
-  label: string
-  value: string
-  change: string
-  tone?: string
-}) {
-  return (
-    <article className={`admin-stat ${tone}`}>
-      <div>
-        <p>{label}</p>
-        <strong>{value}</strong>
-      </div>
-      <span>{change}</span>
-    </article>
-  )
-}
-
-function DonutChart() {
-  return (
-    <div className="donut-wrap">
-      <div className="donut">
-        <div>
-          <strong>1.284</strong>
-          <span>personas</span>
-        </div>
-      </div>
-      <ul>
-        <li>
-          <i className="c1" /> Nuevos <b>18%</b>
-        </li>
-        <li>
-          <i className="c2" /> Encuentro <b>24%</b>
-        </li>
-        <li>
-          <i className="c3" /> Universidad <b>31%</b>
-        </li>
-        <li>
-          <i className="c4" /> Destino <b>27%</b>
-        </li>
-      </ul>
-    </div>
-  )
-}
-
-function BarChart() {
-  const values = [42, 60, 48, 73, 65, 82]
-  return (
-    <div className="bar-chart">
-      <div className="bar-y">
-        <span>$8M</span>
-        <span>$4M</span>
-        <span>$0</span>
-      </div>
-      <div className="bars">
-        {values.map((v, i) => (
-          <div key={i} className="bar-column">
-            <div className="bar-pair">
-              <i style={{ height: `${v}%` }} />
-              <i style={{ height: `${Math.max(25, v - 22)}%` }} />
-            </div>
-            <span>{["Ene", "Feb", "Mar", "Abr", "May", "Jun"][i]}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function Dashboard({ go }: { go: (s: string) => void }) {
-  const name = useContext(StaffName)
-  const activity = [
-    ["María Fernanda Gómez", "registró un pago de $150.000", "Hace 8 min", 47],
-    ["Andrés Moreno", "inscribió a Juan Pérez en Encuentro", "Hace 24 min", 14],
-    ["Laura Martínez", "marcó asistencia de Universidad", "Hace 1 h", 45],
-    ["Carlos Rodríguez", "subió un documento de soporte", "Hace 2 h", 11],
-    ["Sistema MAI", "generó 3 certificados de graduación", "Hace 3 h", 5],
-  ]
-  return (
-    <>
-      <header className="page-welcome">
-        <div>
-          <p>Jueves, 9 de julio</p>
-          <h1>Hola, {name}.</h1>
-          <span>Este es el pulso de MAI hoy.</span>
-        </div>
-        <button onClick={() => go("Personas")}>
-          <AIcon name="plus" /> Registrar persona
-        </button>
-      </header>
-      <section className="stat-grid">
-        <Stat label="Personas activas" value="1.284" change="+4.8% este mes" />
-        <Stat label="Líderes" value="46" change="8 equipos activos" />
-        <Stat label="Discípulos" value="327" change="+18 este mes" />
-        <Stat
-          label="Próximo encuentro"
-          value="52"
-          change="8 cupos disponibles"
-          tone="stat-accent"
-        />
-      </section>
-      <section className="dashboard-grid">
-        <article className="panel people-stage">
-          <PanelTitle
-            kicker="Proceso MAI"
-            title="Personas por etapa"
-            action="Ver personas"
-            onAction={() => go("Personas")}
-          />
-          <DonutChart />
-        </article>
-        <article className="panel finance-chart">
-          <PanelTitle
-            kicker="Finanzas"
-            title="Ingresos vs. egresos"
-            action="Ver reporte"
-            onAction={() => go("Reportes")}
-          />
-          <BarChart />
-          <div className="chart-legend">
-            <span>
-              <i /> Ingresos <b>$7.8M</b>
-            </span>
-            <span>
-              <i /> Egresos <b>$5.1M</b>
-            </span>
-          </div>
-        </article>
-      </section>
-      <section className="dashboard-lower">
-        <article className="panel quick-panel">
-          <PanelTitle kicker="Acciones" title="Accesos rápidos" />
-          <div className="quick-grid">
-            {[
-              ["Registrar persona", "people", "Personas"],
-              ["Inscribir a encuentro", "calendar", "Encuentros"],
-              ["Registrar pago", "wallet", "Pagos"],
-              ["Subir documento", "upload", "Documentos"],
-            ].map(([label, icon, page]) => (
-              <button key={label} onClick={() => go(page)}>
-                <span>
-                  <AIcon name={icon as AdminIcon} />
-                </span>
-                {label}
-                <AIcon name="arrow" />
-              </button>
-            ))}
-          </div>
-        </article>
-        <article className="panel activity-panel">
-          <PanelTitle
-            kicker="En vivo"
-            title="Actividad reciente"
-            action="Ver auditoría"
-            onAction={() => go("Auditoría")}
-          />
-          <div className="activity-list">
-            {activity.map(([name, action, time, img]) => (
-              <div className="activity-row" key={name as string}>
-                <img src={avatar(img as number)} alt="" />
-                <p>
-                  <strong>{name}</strong> {action}
-                  <span>{time}</span>
-                </p>
-                <i />
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
-      <section className="mini-stat-row">
-        <div>
-          <AIcon name="wallet" />
-          <p>
-            Pagos pendientes<strong>$3.450.000</strong>
-          </p>
-          <span>23 personas</span>
-        </div>
-        <div>
-          <AIcon name="school" />
-          <p>
-            Universidad de la Vida<strong>124 estudiantes</strong>
-          </p>
-          <span>Generación #12</span>
-        </div>
-        <div>
-          <AIcon name="target" />
-          <p>
-            Capacitación Destino<strong>86 estudiantes</strong>
-          </p>
-          <span>6 cursos activos</span>
-        </div>
-        <div>
-          <AIcon name="certificate" />
-          <p>
-            Certificados pendientes<strong>12 por generar</strong>
-          </p>
-          <span>4 listos hoy</span>
-        </div>
-      </section>
-      <section className="admin-attention">
-        <header>
-          <span>Requiere tu atención</span>
-          <h2>Procesos pendientes</h2>
-        </header>
-        <button onClick={() => go("Usuarios")}>
-          <span>12</span>
-          <p>
-            <strong>Cuentas esperando aprobación</strong>
-            <small>Revisar identidad, rol y permisos</small>
-          </p>
-          <AIcon name="arrow" />
-        </button>
-        <button onClick={() => go("Mis discípulos")}>
-          <span>23</span>
-          <p>
-            <strong>Solicitudes de discípulos</strong>
-            <small>Nuevas inscripciones por enlace</small>
-          </p>
-          <AIcon name="arrow" />
-        </button>
-        <button onClick={() => go("Documentos")}>
-          <span>8</span>
-          <p>
-            <strong>Documentos pendientes</strong>
-            <small>Validación y aprobación</small>
-          </p>
-          <AIcon name="arrow" />
-        </button>
-      </section>
-    </>
-  )
-}
-
 export function PanelTitle({
   kicker,
   title,
@@ -985,1547 +487,20 @@ export function StatusPill({
   return <span className={`status-pill ${tone}`}>{children}</span>
 }
 
-function PeoplePage({ openPerson }: { openPerson: (id: number) => void }) {
-  const [query, setQuery] = useState("")
-  const filtered = people.filter((p) =>
-    p.name.toLowerCase().includes(query.toLowerCase()),
-  )
-  return (
-    <>
-      <PageHeader
-        eyebrow="Base de datos"
-        title="Personas"
-        copy="El centro de cada proceso, equipo y etapa dentro de MAI."
-        primary="Registrar persona"
-      />
-      <div className="module-stats">
-        <div>
-          <span>Total personas</span>
-          <strong>1.284</strong>
-          <small>+62 este año</small>
-        </div>
-        <div>
-          <span>Activas</span>
-          <strong>1.109</strong>
-          <small>86% de la base</small>
-        </div>
-        <div>
-          <span>Nuevas este mes</span>
-          <strong>32</strong>
-          <small>+12% vs. junio</small>
-        </div>
-        <div>
-          <span>Sin líder asignado</span>
-          <strong>18</strong>
-          <small>Requieren atención</small>
-        </div>
-      </div>
-      <section className="panel table-panel">
-        <div className="table-tools">
-          <div className="admin-search">
-            <AIcon name="search" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nombre, documento o teléfono..."
-            />
-          </div>
-          <button>
-            <AIcon name="filter" /> Filtros
-          </button>
-          <button>
-            <AIcon name="download" /> Exportar
-          </button>
-        </div>
-        <div className="data-table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Persona</th>
-                <th>Etapa</th>
-                <th>Líder</th>
-                <th>Pago</th>
-                <th>Progreso</th>
-                <th>Estado</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((person) => (
-                <tr key={person.id} onClick={() => openPerson(person.id)}>
-                  <td>
-                    <div className="person-cell">
-                      <img src={person.img} alt="" />
-                      <p>
-                        <strong>{person.name}</strong>
-                        <span>
-                          {person.phone} · {person.role}
-                        </span>
-                      </p>
-                    </div>
-                  </td>
-                  <td>{person.stage}</td>
-                  <td>{person.leader}</td>
-                  <td>
-                    <StatusPill
-                      tone={
-                        person.payment === "Pendiente"
-                          ? "pill-warn"
-                          : person.payment === "Parcial"
-                            ? "pill-blue"
-                            : "pill-ok"
-                      }
-                    >
-                      {person.payment}
-                    </StatusPill>
-                  </td>
-                  <td>
-                    <div className="progress-cell">
-                      <span>
-                        <i style={{ width: `${person.progress}%` }} />
-                      </span>
-                      <b>{person.progress}%</b>
-                    </div>
-                  </td>
-                  <td>
-                    <StatusPill
-                      tone={person.status === "Nuevo" ? "pill-blue" : "pill-ok"}
-                    >
-                      {person.status}
-                    </StatusPill>
-                  </td>
-                  <td>
-                    <button className="icon-more">
-                      <AIcon name="more" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="table-footer">
-          <span>Mostrando {filtered.length} de 1.284 personas</span>
-          <div>
-            <button>←</button>
-            <b>1</b>
-            <button>2</button>
-            <button>3</button>
-            <button>→</button>
-          </div>
-        </div>
-      </section>
-    </>
-  )
-}
-
-function PersonProfile({ id, back }: { id: number; back: () => void }) {
-  const person = people.find((p) => p.id === id) || people[0]
-  const steps = [
-    ["Ingreso a MAI", "12 enero 2026", true],
-    ["Pre-encuentro", "4 clases completadas", true],
-    ["Encuentro MAI", "18–20 abril 2026", true],
-    ["Universidad", "Clase 6 de 8", false],
-    ["Graduación", "Pendiente", false],
-    ["Destino", "Aún no inicia", false],
-  ]
-  return (
-    <>
-      <button className="page-back" onClick={back}>
-        ← Volver a personas
-      </button>
-      <section className="profile-hero">
-        <div className="profile-person">
-          <img src={person.img} alt="" />
-          <div>
-            <span>MAI-001284</span>
-            <h1>{person.name}</h1>
-            <p>{person.role} · Ingresó el 12 de enero de 2026</p>
-            <div>
-              <StatusPill tone="pill-ok">Activo</StatusPill>
-              <StatusPill tone="pill-blue">{person.stage}</StatusPill>
-            </div>
-          </div>
-        </div>
-        <div className="profile-actions">
-          <button>
-            <AIcon name="file" /> Generar documento
-          </button>
-          <button className="admin-primary">Editar perfil</button>
-          <button className="icon-more">
-            <AIcon name="more" />
-          </button>
-        </div>
-      </section>
-      <nav className="profile-tabs">
-        {["Información", "Equipo", "Permisos", "Actividad", "Documentos"].map(
-          (item, i) => (
-            <button className={i === 0 ? "active" : ""} key={item}>
-              {item}
-            </button>
-          ),
-        )}
-      </nav>
-      <section className="profile-quick-actions">
-        {[
-          ["Inscribir a encuentro", "calendar"],
-          ["Registrar pago", "wallet"],
-          ["Subir documento", "upload"],
-          ["Agregar observación", "file"],
-          ["Cambiar líder", "team"],
-          ["Generar certificado", "certificate"],
-        ].map(([label, icon]) => (
-          <button key={label}>
-            <AIcon name={icon as AdminIcon} />
-            {label}
-          </button>
-        ))}
-      </section>
-      <div className="profile-grid">
-        <section className="panel profile-main">
-          <PanelTitle kicker="Proceso personal" title="Camino en MAI" />
-          <div className="journey">
-            {steps.map(([title, meta, done], i) => (
-              <div className={done ? "journey-done" : ""} key={title as string}>
-                <span>{done ? <AIcon name="check" /> : i + 1}</span>
-                <p>
-                  <strong>{title}</strong>
-                  <small>{meta}</small>
-                </p>
-                {i < steps.length - 1 && <i />}
-              </div>
-            ))}
-          </div>
-        </section>
-        <aside className="panel profile-contact">
-          <PanelTitle kicker="Información" title="Datos personales" />
-          <dl>
-            <div>
-              <dt>Documento</dt>
-              <dd>1.023.456.789</dd>
-            </div>
-            <div>
-              <dt>Teléfono</dt>
-              <dd>{person.phone}</dd>
-            </div>
-            <div>
-              <dt>Correo</dt>
-              <dd>juan.perez@email.com</dd>
-            </div>
-            <div>
-              <dt>Líder</dt>
-              <dd>{person.leader}</dd>
-            </div>
-            <div>
-              <dt>Ministerio</dt>
-              <dd>Servicio familiar</dd>
-            </div>
-            <div>
-              <dt>Fecha de nacimiento</dt>
-              <dd>14 de junio de 1998</dd>
-            </div>
-          </dl>
-        </aside>
-      </div>
-      <section className="profile-summary">
-        <article className="panel">
-          <span>Encuentro</span>
-          <h3>Completado</h3>
-          <p>18–20 abril 2026</p>
-          <StatusPill tone="pill-ok">Asistió</StatusPill>
-        </article>
-        <article className="panel">
-          <span>Universidad</span>
-          <h3>6 de 8 clases</h3>
-          <div className="wide-progress">
-            <i style={{ width: "75%" }} />
-          </div>
-          <p>75% completado</p>
-        </article>
-        <article className="panel">
-          <span>Estado financiero</span>
-          <h3>$50.000 pendiente</h3>
-          <p>Pagado: $150.000 de $200.000</p>
-          <StatusPill tone="pill-warn">Pago parcial</StatusPill>
-        </article>
-      </section>
-      <section className="panel profile-timeline">
-        <PanelTitle kicker="Historial" title="Actividad de la persona" />
-        <div className="activity-list">
-          <div className="activity-row">
-            <span className="timeline-icon">
-              <AIcon name="wallet" />
-            </span>
-            <p>
-              <strong>Pago registrado</strong> por María Gómez
-              <span>5 julio 2026 · $100.000</span>
-            </p>
-          </div>
-          <div className="activity-row">
-            <span className="timeline-icon">
-              <AIcon name="school" />
-            </span>
-            <p>
-              <strong>Asistió a la clase 6</strong> de Universidad
-              <span>2 julio 2026 · Laura Martínez</span>
-            </p>
-          </div>
-          <div className="activity-row">
-            <span className="timeline-icon">
-              <AIcon name="calendar" />
-            </span>
-            <p>
-              <strong>Encuentro completado</strong>
-              <span>20 abril 2026 · Encuentro MAI</span>
-            </p>
-          </div>
-        </div>
-      </section>
-    </>
-  )
-}
-
-function EncountersPage() {
-  const [section, setSection] = useState("Resumen")
-  const encounterSections = [
-    "Resumen",
-    "Participantes",
-    "Finanzas",
-    "Gastos",
-    "Documentos",
-    "Equipo",
-    "Reportes",
-  ]
-  return (
-    <>
-      <PageHeader
-        eyebrow="Procesos"
-        title="Encuentros"
-        copy="Administra inscripciones, pagos, cupos y asistencia en un solo flujo."
-        primary="Crear encuentro"
-      />
-      <section className="encounter-feature">
-        <div className="encounter-copy">
-          <span>Próximo encuentro</span>
-          <h2>
-            Encuentro MAI
-            <br />
-            <em>Octubre 2026</em>
-          </h2>
-          <p>18 — 20 de octubre · Lugar por confirmar</p>
-          <div>
-            <button>
-              Ver dashboard del encuentro <AIcon name="arrow" />
-            </button>
-            <button>Inscribir persona</button>
-          </div>
-        </div>
-        <div className="encounter-capacity">
-          <div className="capacity-ring">
-            <div>
-              <strong>42</strong>
-              <span>de 50 cupos</span>
-            </div>
-          </div>
-          <ul>
-            <li>
-              <span>Confirmados</span>
-              <b>32</b>
-            </li>
-            <li>
-              <span>Pago parcial</span>
-              <b>10</b>
-            </li>
-            <li>
-              <span>Pendientes</span>
-              <b>8</b>
-            </li>
-          </ul>
-        </div>
-      </section>
-      <section className="encounter-link">
-        <div>
-          <span>Enlace público de inscripción</span>
-          <strong>mai.org/encuentro/t8k4p2x9</strong>
-          <small>Activo · 42 / 50 registros · Expira 17 oct 2026</small>
-        </div>
-        <button>Copiar enlace</button>
-        <button>
-          <b>WA</b> WhatsApp
-        </button>
-        <button>
-          <b>QR</b> Código QR
-        </button>
-      </section>
-      <nav className="encounter-tabs">
-        {encounterSections.map((item) => (
-          <button
-            className={section === item ? "active" : ""}
-            onClick={() => setSection(item)}
-            key={item}
-          >
-            {item}
-          </button>
-        ))}
-      </nav>
-      <div className="module-stats">
-        <div>
-          <span>Total inscritos</span>
-          <strong>42</strong>
-          <small>84% del cupo</small>
-        </div>
-        <div>
-          <span>Valor recaudado</span>
-          <strong>$6.8M</strong>
-          <small>Meta: $10M</small>
-        </div>
-        <div>
-          <span>Saldo pendiente</span>
-          <strong>$1.6M</strong>
-          <small>12 personas</small>
-        </div>
-        <div>
-          <span>Líderes responsables</span>
-          <strong>8</strong>
-          <small>2 coordinadores</small>
-        </div>
-      </div>
-      {section === "Finanzas" && (
-        <section className="encounter-finance">
-          <article className="panel">
-            <PanelTitle kicker="Recaudo" title="Ingresos del encuentro" />
-            <div className="finance-big">
-              <span>Ingresos esperados</span>
-              <strong>$15.000.000</strong>
-            </div>
-            <dl>
-              <div>
-                <dt>Ingresos recibidos</dt>
-                <dd>$11.500.000</dd>
-              </div>
-              <div>
-                <dt>Saldo pendiente</dt>
-                <dd>$3.500.000</dd>
-              </div>
-              <div>
-                <dt>Personas pendientes</dt>
-                <dd>12</dd>
-              </div>
-            </dl>
-          </article>
-          <article className="panel">
-            <PanelTitle
-              kicker="Operación"
-              title="Gastos del encuentro"
-              action="Registrar gasto"
-            />
-            <dl className="expense-breakdown">
-              <div>
-                <dt>Alimentación</dt>
-                <dd>$2.500.000</dd>
-              </div>
-              <div>
-                <dt>Transporte</dt>
-                <dd>$800.000</dd>
-              </div>
-              <div>
-                <dt>Materiales</dt>
-                <dd>$400.000</dd>
-              </div>
-              <div>
-                <dt>Lugar</dt>
-                <dd>$1.000.000</dd>
-              </div>
-              <div>
-                <dt>Total gastos</dt>
-                <dd>$4.700.000</dd>
-              </div>
-            </dl>
-          </article>
-          <article className="balance-card">
-            <span>Balance actual</span>
-            <strong>$6.800.000</strong>
-            <p>Ingresos recibidos menos gastos registrados</p>
-            <AIcon name="chart" />
-          </article>
-        </section>
-      )}
-      {section === "Gastos" && (
-        <section className="panel encounter-expenses">
-          <PanelTitle
-            kicker="Gastos asociados"
-            title="Control operativo"
-            action="Registrar gasto"
-          />
-          <div className="expense-mobile-action">
-            <AIcon name="plus" />
-            <p>
-              <strong>Registrar un gasto</strong>
-              <span>Toma una foto del recibo desde tu celular.</span>
-            </p>
-            <AIcon name="arrow" />
-          </div>
-          <p className="finance-note">
-            <AIcon name="shield" /> Cada gasto crea un registro financiero,
-            guarda su soporte y actualiza automáticamente el balance.
-          </p>
-        </section>
-      )}
-      <section className="panel table-panel">
-        <PanelTitle
-          kicker="Participantes"
-          title="Inscripciones recientes"
-          action="Ver todos"
-        />
-        <div className="data-table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Persona</th>
-                <th>Líder</th>
-                <th>Inscripción</th>
-                <th>Pago</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {people.slice(0, 4).map((p, i) => (
-                <tr key={p.id}>
-                  <td>
-                    <div className="person-cell">
-                      <img src={p.img} alt="" />
-                      <p>
-                        <strong>{p.name}</strong>
-                        <span>CC 1.02{i}...</span>
-                      </p>
-                    </div>
-                  </td>
-                  <td>{p.leader}</td>
-                  <td>0{4 + i} jul 2026</td>
-                  <td>
-                    <div className="progress-cell">
-                      <span>
-                        <i style={{ width: `${[100, 70, 40, 100][i]}%` }} />
-                      </span>
-                      <b>{[100, 70, 40, 100][i]}%</b>
-                    </div>
-                  </td>
-                  <td>
-                    <StatusPill tone={i === 2 ? "pill-warn" : "pill-ok"}>
-                      {i === 2 ? "Preinscrito" : "Confirmado"}
-                    </StatusPill>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </>
-  )
-}
-
-function UniversityPage() {
-  const classes = [
-    "Clase 1",
-    "Clase 2",
-    "Clase 3",
-    "Clase 4",
-    "Encuentro",
-    "Clase 5",
-    "Clase 6",
-    "Clase 7",
-    "Clase 8",
-    "Graduación",
-  ]
-  return (
-    <>
-      <PageHeader
-        eyebrow="Formación"
-        title="Universidad de la Vida"
-        copy="Acompañamiento antes y después del encuentro para cada generación."
-        primary="Nueva generación"
-      />
-      <section className="generation-hero">
-        <div>
-          <span>Generación activa</span>
-          <h2>Generación #12</h2>
-          <p>15 mayo — 30 agosto 2026 · 3 profesores</p>
-        </div>
-        <div className="generation-meta">
-          <p>
-            <strong>124</strong>
-            <span>Estudiantes</span>
-          </p>
-          <p>
-            <strong>89%</strong>
-            <span>Asistencia</span>
-          </p>
-          <p>
-            <strong>76%</strong>
-            <span>Progreso</span>
-          </p>
-        </div>
-      </section>
-      <section className="panel learning-path">
-        <PanelTitle
-          kicker="Ruta académica"
-          title="Progreso de la generación"
-          action="Tomar asistencia"
-        />
-        <div className="class-track">
-          {classes.map((c, i) => (
-            <div
-              className={
-                i < 7 ? "class-complete" : i === 7 ? "class-current" : ""
-              }
-              key={c}
-            >
-              <span>{i < 7 ? <AIcon name="check" /> : i + 1}</span>
-              <p>{c}</p>
-              {i < classes.length - 1 && <i />}
-            </div>
-          ))}
-        </div>
-      </section>
-      <div className="university-grid">
-        <section className="panel">
-          <PanelTitle kicker="Próxima clase" title="Clase 7 · Identidad" />
-          <div className="next-class">
-            <div>
-              <AIcon name="calendar" />
-              <p>
-                <strong>Sábado, 11 de julio</strong>
-                <span>8:00 AM · Sede principal</span>
-              </p>
-            </div>
-            <div>
-              <AIcon name="people" />
-              <p>
-                <strong>Laura V. Martínez</strong>
-                <span>Profesora asignada</span>
-              </p>
-            </div>
-            <button>Tomar asistencia</button>
-          </div>
-        </section>
-        <section className="panel">
-          <PanelTitle kicker="Atención" title="Estudiantes por acompañar" />
-          <div className="attention-list">
-            {people.slice(0, 3).map((p, i) => (
-              <div key={p.id}>
-                <img src={p.img} alt="" />
-                <p>
-                  <strong>{p.name}</strong>
-                  <span>
-                    {
-                      [
-                        "2 ausencias consecutivas",
-                        "Material pendiente",
-                        "Pago de grado pendiente",
-                      ][i]
-                    }
-                  </span>
-                </p>
-                <button>
-                  <AIcon name="arrow" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </>
-  )
-}
-
-function PaymentsPage({ expenses = false }: { expenses?: boolean }) {
-  const rows = expenses
-    ? [
-        [
-          "Alimentos Encuentro",
-          "Mercados La 14",
-          "Encuentro",
-          "$450.000",
-          "Aprobado",
-        ],
-        [
-          "Material pedagógico",
-          "Papelería Central",
-          "Universidad",
-          "$286.500",
-          "Pendiente",
-        ],
-        [
-          "Transporte equipo",
-          "Transportes Bogotá",
-          "Operación",
-          "$320.000",
-          "Aprobado",
-        ],
-        [
-          "Producción audiovisual",
-          "Visual MAI",
-          "Comunicaciones",
-          "$850.000",
-          "Aprobado",
-        ],
-      ]
-    : [
-        [
-          "Juan David Pérez",
-          "Encuentro MAI",
-          "Transferencia",
-          "$100.000",
-          "Aplicado",
-        ],
-        [
-          "Samuel Esteban Torres",
-          "Universidad",
-          "Nequi",
-          "$80.000",
-          "Aplicado",
-        ],
-        [
-          "Camila Alejandra Ruiz",
-          "Encuentro MAI",
-          "Efectivo",
-          "$200.000",
-          "Por verificar",
-        ],
-        [
-          "Mateo Santiago León",
-          "Destino",
-          "Bancolombia",
-          "$150.000",
-          "Aplicado",
-        ],
-      ]
-  return (
-    <>
-      <PageHeader
-        eyebrow="Control financiero"
-        title={expenses ? "Gastos" : "Pagos"}
-        copy={
-          expenses
-            ? "Registra, soporta y aprueba cada egreso con trazabilidad completa."
-            : "Controla recaudos, saldos, comprobantes y cuentas por cobrar."
-        }
-        primary={expenses ? "Registrar gasto" : "Registrar pago"}
-      />
-      <div className="module-stats">
-        <div>
-          <span>{expenses ? "Gastos del mes" : "Recaudado este mes"}</span>
-          <strong>{expenses ? "$5.1M" : "$7.8M"}</strong>
-          <small>Julio 2026</small>
-        </div>
-        <div>
-          <span>{expenses ? "Pendiente aprobación" : "Saldo pendiente"}</span>
-          <strong>{expenses ? "$386K" : "$3.4M"}</strong>
-          <small>{expenses ? "4 solicitudes" : "23 personas"}</small>
-        </div>
-        <div>
-          <span>
-            {expenses ? "Centro con mayor gasto" : "Pagos verificados"}
-          </span>
-          <strong>{expenses ? "Encuentros" : "96%"}</strong>
-          <small>{expenses ? "$2.3M" : "184 transacciones"}</small>
-        </div>
-        <div>
-          <span>
-            {expenses ? "Documentos soporte" : "Comprobantes pendientes"}
-          </span>
-          <strong>{expenses ? "32" : "7"}</strong>
-          <small>Requieren revisión</small>
-        </div>
-      </div>
-      <section className="panel table-panel">
-        <div className="table-tools">
-          <div className="admin-search">
-            <AIcon name="search" />
-            <input
-              placeholder={`Buscar ${
-                expenses ? "gasto o proveedor" : "pago o persona"
-              }...`}
-            />
-          </div>
-          <button>
-            <AIcon name="filter" /> Filtros
-          </button>
-          <button>
-            <AIcon name="download" /> Exportar
-          </button>
-        </div>
-        <div className="data-table-wrap">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>{expenses ? "Concepto" : "Persona"}</th>
-                <th>{expenses ? "Proveedor" : "Concepto"}</th>
-                <th>{expenses ? "Categoría" : "Método"}</th>
-                <th>Valor</th>
-                <th>Estado</th>
-                <th>Soporte</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={r[0]}>
-                  <td>
-                    <strong>{r[0]}</strong>
-                    <small>
-                      0{8 - i} jul 2026 · #MAI-00{184 + i}
-                    </small>
-                  </td>
-                  <td>{r[1]}</td>
-                  <td>{r[2]}</td>
-                  <td>
-                    <strong>{r[3]}</strong>
-                  </td>
-                  <td>
-                    <StatusPill
-                      tone={
-                        r[4].includes("Pendiente") || r[4].includes("verificar")
-                          ? "pill-warn"
-                          : "pill-ok"
-                      }
-                    >
-                      {r[4]}
-                    </StatusPill>
-                  </td>
-                  <td>
-                    <button className="file-button">
-                      <AIcon name="file" /> PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="finance-note">
-          <AIcon name="shield" />
-          <p>
-            Los registros financieros no se eliminan definitivamente. Reversos y
-            anulaciones conservan su historial en auditoría. Esta herramienta es
-            de control interno y no reemplaza la contabilidad legal o
-            tributaria.
-          </p>
-        </div>
-      </section>
-    </>
-  )
-}
-
-function DocumentsPage({ certificates = false }: { certificates?: boolean }) {
-  const docs = certificates
-    ? [
-        [
-          "Certificado Universidad · Juan Pérez",
-          "Universidad de la Vida",
-          "MAI-UV-2026-0184",
-          "Generado",
-        ],
-        [
-          "Certificado Destino · Laura Martínez",
-          "Liderazgo Cristiano",
-          "MAI-DE-2026-0098",
-          "Generado",
-        ],
-        [
-          "Certificado Universidad · Samuel Torres",
-          "Universidad de la Vida",
-          "MAI-UV-2026-0185",
-          "Pendiente",
-        ],
-      ]
-    : [
-        ["Comprobante de pago #0184", "Finanzas", "María Gómez", "Activo"],
-        ["Soporte de gasto #0082", "Encuentros", "Tesorería MAI", "Pendiente"],
-        [
-          "Plan de estudio · Liderazgo",
-          "Destino",
-          "Laura Martínez",
-          "Aprobado",
-        ],
-        [
-          "Listado de asistencia · Clase 6",
-          "Universidad",
-          "Carlos Rodríguez",
-          "Activo",
-        ],
-      ]
-  return (
-    <>
-      <PageHeader
-        eyebrow={certificates ? "Logros" : "Biblioteca interna"}
-        title={certificates ? "Certificados" : "Documentos"}
-        copy={
-          certificates
-            ? "Genera, descarga y verifica certificados con código único."
-            : "Toda la documentación de MAI, organizada y disponible según permisos."
-        }
-        primary={certificates ? "Generar certificado" : "Subir documento"}
-      />
-      {certificates && (
-        <section className="certificate-preview">
-          <div className="certificate-sheet">
-            <img className="cert-logo" src="/logo-mai.png" alt="Iglesia MAI" />
-            <span>IGLESIA MAI</span>
-            <p>Se certifica que</p>
-            <h2>JUAN DAVID PÉREZ</h2>
-            <p>ha completado satisfactoriamente el programa</p>
-            <h3>Universidad de la Vida</h3>
-            <div>
-              <span>MAI-UV-2026-0184</span>
-              <i>QR</i>
-            </div>
-          </div>
-          <div className="certificate-copy">
-            <span>Vista previa</span>
-            <h2>Certificación conectada al proceso.</h2>
-            <p>
-              Los estudiantes elegibles pueden recibir automáticamente un PDF
-              premium con código único y QR verificable.
-            </p>
-            <button>
-              Descargar ejemplo <AIcon name="download" />
-            </button>
-          </div>
-        </section>
-      )}
-      <section className="panel table-panel">
-        <div className="table-tools">
-          <div className="admin-search">
-            <AIcon name="search" />
-            <input
-              placeholder={`Buscar ${
-                certificates ? "certificado" : "documento"
-              }...`}
-            />
-          </div>
-          <button>
-            <AIcon name="filter" /> Categorías
-          </button>
-          <button>
-            <AIcon name="upload" /> {certificates ? "Plantillas" : "Subir"}
-          </button>
-        </div>
-        <div className="doc-grid">
-          {docs.map((d, i) => (
-            <article key={d[0]}>
-              <div className="doc-icon">
-                <AIcon name={certificates ? "certificate" : "file"} />
-                <small>{i % 2 ? "DOC" : "PDF"}</small>
-              </div>
-              <div>
-                <StatusPill
-                  tone={d[3] === "Pendiente" ? "pill-warn" : "pill-ok"}
-                >
-                  {d[3]}
-                </StatusPill>
-                <h3>{d[0]}</h3>
-                <p>
-                  {d[1]} · {d[2]}
-                </p>
-                <span>
-                  Actualizado hace {i + 1} día{i ? "s" : ""}
-                </span>
-              </div>
-              <button>
-                <AIcon name="more" />
-              </button>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
-
-function PersonalLinkCard() {
-  const [copied, setCopied] = useState(false)
-  const link = "https://mai.org/inscripcion/k9x7m2c4"
-  return (
-    <section className="personal-link-card">
-      <div className="personal-link-copy">
-        <span>Mi enlace de registro</span>
-        <h2>
-          Haz crecer tu equipo,
-          <br />
-          <em>un corazón a la vez.</em>
-        </h2>
-        <p>
-          Comparte este enlace con las personas que quieres acompañar en su
-          proceso en MAI.
-        </p>
-        <div className="personal-url">
-          <span>mai.org/inscripcion/k9x7m2c4</span>
-          <button
-            onClick={() => {
-              navigator.clipboard?.writeText(link)
-              setCopied(true)
-            }}
-          >
-            {copied ? "Copiado" : "Copiar enlace"}
-          </button>
-        </div>
-        <div className="personal-actions">
-          <button>
-            <b>WA</b> Compartir por WhatsApp
-          </button>
-          <button>
-            <b>QR</b> Mostrar QR
-          </button>
-          <button
-            onClick={() => {
-              window.location.hash = "#/inscripcion/k9x7m2c4"
-            }}
-          >
-            <AIcon name="eye" /> Vista previa
-          </button>
-        </div>
-      </div>
-      <div className="qr-preview">
-        <div className="fake-qr">
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
-        <p>Enlace activo</p>
-        <span>17 registros · Sin expiración</span>
-      </div>
-    </section>
-  )
-}
-
-function TeamPage({ leaders = false }: { leaders?: boolean }) {
-  return (
-    <>
-      <PageHeader
-        eyebrow={leaders ? "Estructura pastoral" : "Mi equipo"}
-        title={leaders ? "Líderes" : "Mis discípulos"}
-        copy={
-          leaders
-            ? "Acompaña equipos y visualiza la red de discipulado de MAI."
-            : "Personas que caminan contigo y sus próximos pasos."
-        }
-        primary={leaders ? "Invitar líder" : "Agregar discípulo"}
-      />
-      {!leaders && <PersonalLinkCard />}
-      <div className="module-stats">
-        <div>
-          <span>Total en mi equipo</span>
-          <strong>18</strong>
-          <small>16 activos</small>
-        </div>
-        <div>
-          <span>Solicitudes nuevas</span>
-          <strong>3</strong>
-          <small>Esperando aprobación</small>
-        </div>
-        <div>
-          <span>Pagos pendientes</span>
-          <strong>4</strong>
-          <small>$320.000 total</small>
-        </div>
-        <div>
-          <span>En formación</span>
-          <strong>12</strong>
-          <small>Universidad + Destino</small>
-        </div>
-      </div>
-      {!leaders && (
-        <section className="panel new-requests">
-          <PanelTitle
-            kicker="Nuevos registros"
-            title="Solicitudes de discípulos"
-            action="Ver todas"
-          />
-          <div>
-            {people.slice(1, 4).map((person, i) => (
-              <article key={person.id}>
-                <img src={person.img} alt="" />
-                <p>
-                  <strong>{person.name}</strong>
-                  <span>Hace {[12, 38, 54][i]} minutos · Enlace personal</span>
-                </p>
-                <button>Ver</button>
-                <button className="accept">Aceptar</button>
-                <button>Rechazar</button>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-      <div className="disciples-grid">
-        {people.slice(0, 4).map((p) => (
-          <article className="panel disciple-card" key={p.id}>
-            <img src={p.img} alt="" />
-            <div>
-              <StatusPill tone="pill-ok">{p.status}</StatusPill>
-              <h3>{p.name}</h3>
-              <p>{p.phone}</p>
-            </div>
-            <dl>
-              <div>
-                <dt>Encuentro</dt>
-                <dd>{p.progress > 50 ? "Completado" : "Pendiente"}</dd>
-              </div>
-              <div>
-                <dt>Pago</dt>
-                <dd>{p.payment}</dd>
-              </div>
-              <div>
-                <dt>Progreso</dt>
-                <dd>{p.progress}%</dd>
-              </div>
-            </dl>
-            <button>
-              Ver proceso <AIcon name="arrow" />
-            </button>
-          </article>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function GenericPage({ page }: { page: string }) {
-  const configs: Record<string, [string, string, string, AdminIcon]> = {
-    Líderes: [
-      "Estructura pastoral",
-      "Líderes",
-      "Acompaña equipos y visualiza la red de discipulado de MAI.",
-      "team",
-    ],
-    "Mis discípulos": [
-      "Mi equipo",
-      "Mis discípulos",
-      "Personas que caminan contigo y sus próximos pasos.",
-      "people",
-    ],
-    "Capacitación Destino": [
-      "Formación",
-      "Capacitación Destino",
-      "Cursos, profesores, estudiantes y progreso académico.",
-      "target",
-    ],
-    Reportes: [
-      "Inteligencia MAI",
-      "Reportes",
-      "Indicadores conectados para tomar mejores decisiones.",
-      "chart",
-    ],
-    Notificaciones: [
-      "Centro de actividad",
-      "Notificaciones",
-      "Lo importante, en el momento correcto.",
-      "bell",
-    ],
-    Auditoría: [
-      "Seguridad",
-      "Auditoría",
-      "Trazabilidad de usuarios, acciones y registros afectados.",
-      "shield",
-    ],
-    Configuración: [
-      "Administración",
-      "Configuración",
-      "Usuarios, roles, permisos, plantillas y parámetros generales.",
-      "settings",
-    ],
-  }
-  const c = configs[page] || [
-    "Módulo",
-    page,
-    "Gestión interna conectada con todo el proceso MAI.",
-    "settings",
-  ]
-  const isTeam = page === "Mis discípulos" || page === "Líderes"
-  const isNotification = page === "Notificaciones"
-  const isAudit = page === "Auditoría"
-  const isSettings = page === "Configuración"
-  if (isTeam) return <TeamPage leaders={page === "Líderes"} />
-  return (
-    <>
-      <PageHeader
-        eyebrow={c[0]}
-        title={c[1]}
-        copy={c[2]}
-        primary={
-          isSettings
-            ? "Guardar cambios"
-            : isAudit
-              ? "Exportar registro"
-              : isNotification
-                ? "Marcar todo como leído"
-                : "Crear nuevo"
-        }
-      />
-      {isTeam ? (
-        <>
-          <div className="module-stats">
-            <div>
-              <span>Total en mi equipo</span>
-              <strong>18</strong>
-              <small>16 activos</small>
-            </div>
-            <div>
-              <span>Próximo encuentro</span>
-              <strong>5</strong>
-              <small>3 confirmados</small>
-            </div>
-            <div>
-              <span>Pagos pendientes</span>
-              <strong>4</strong>
-              <small>$320.000 total</small>
-            </div>
-            <div>
-              <span>En formación</span>
-              <strong>12</strong>
-              <small>Universidad + Destino</small>
-            </div>
-          </div>
-          <div className="disciples-grid">
-            {people.slice(0, 4).map((p) => (
-              <article className="panel disciple-card" key={p.id}>
-                <img src={p.img} alt="" />
-                <div>
-                  <StatusPill tone="pill-ok">{p.status}</StatusPill>
-                  <h3>{p.name}</h3>
-                  <p>{p.phone}</p>
-                </div>
-                <dl>
-                  <div>
-                    <dt>Encuentro</dt>
-                    <dd>{p.progress > 50 ? "Completado" : "Pendiente"}</dd>
-                  </div>
-                  <div>
-                    <dt>Pago</dt>
-                    <dd>{p.payment}</dd>
-                  </div>
-                  <div>
-                    <dt>Progreso</dt>
-                    <dd>{p.progress}%</dd>
-                  </div>
-                </dl>
-                <button>
-                  Ver proceso <AIcon name="arrow" />
-                </button>
-              </article>
-            ))}
-          </div>
-        </>
-      ) : isNotification ? (
-        <NotificationList />
-      ) : isAudit ? (
-        <AuditList />
-      ) : isSettings ? (
-        <SettingsPanel />
-      ) : (
-        <DestinationPage />
-      )}
-    </>
-  )
-}
-
-function DestinationPage() {
-  return (
-    <>
-      <div className="module-stats">
-        <div>
-          <span>Cursos activos</span>
-          <strong>6</strong>
-          <small>3 programas</small>
-        </div>
-        <div>
-          <span>Estudiantes</span>
-          <strong>86</strong>
-          <small>78 activos</small>
-        </div>
-        <div>
-          <span>Profesores</span>
-          <strong>12</strong>
-          <small>2 por asignar</small>
-        </div>
-        <div>
-          <span>Promedio general</span>
-          <strong>4.4</strong>
-          <small>Sobre 5.0</small>
-        </div>
-      </div>
-      <div className="course-grid">
-        {[
-          "Liderazgo Cristiano",
-          "Fundamentos de servicio",
-          "Comunicación con propósito",
-        ].map((title, i) => (
-          <article className="panel course-card" key={title}>
-            <div className={`course-cover course-${i + 1}`}>
-              <span>DESTINO · 2026</span>
-              <AIcon name="target" />
-            </div>
-            <div>
-              <StatusPill tone="pill-blue">En curso</StatusPill>
-              <h3>{title}</h3>
-              <p>
-                {["Laura Martínez", "Carlos Rodríguez", "Andrés Moreno"][i]} ·{" "}
-                {20 + i * 3} estudiantes
-              </p>
-              <div className="wide-progress">
-                <i style={{ width: `${[72, 45, 88][i]}%` }} />
-              </div>
-              <span>{[72, 45, 88][i]}% completado</span>
-              <button>
-                Ver curso <AIcon name="arrow" />
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </>
-  )
-}
-
-function NotificationList() {
-  const list = [
-    ["Tienes 3 discípulos con pagos pendientes.", "wallet"],
-    ["Juan Pérez completó la clase 4.", "school"],
-    ["Hay 5 estudiantes pendientes de asistencia.", "people"],
-    ["Carlos Rodríguez está listo para graduarse.", "certificate"],
-    ["Nuevo documento pendiente de aprobación.", "file"],
-  ]
-  return (
-    <section className="panel notification-list">
-      {list.map(([text, icon], i) => (
-        <article className={i < 2 ? "unread" : ""} key={text}>
-          <span>
-            <AIcon name={icon as AdminIcon} />
-          </span>
-          <div>
-            <h3>{text}</h3>
-            <p>
-              {
-                [
-                  "Hace 8 minutos",
-                  "Hace 1 hora",
-                  "Hace 3 horas",
-                  "Ayer, 4:30 PM",
-                  "Ayer, 11:20 AM",
-                ][i]
-              }
-            </p>
-          </div>
-          <button>
-            <AIcon name="more" />
-          </button>
-        </article>
-      ))}
-    </section>
-  )
-}
-
-function AuditList() {
-  return (
-    <section className="panel table-panel">
-      <div className="table-tools">
-        <div className="admin-search">
-          <AIcon name="search" />
-          <input placeholder="Buscar usuario, acción o registro..." />
-        </div>
-        <button>
-          <AIcon name="filter" /> Filtros
-        </button>
-      </div>
-      <div className="data-table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Acción</th>
-              <th>Módulo</th>
-              <th>Registro afectado</th>
-              <th>Fecha y hora</th>
-              <th>IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              [
-                "Daniela Rojas",
-                "Modificó información",
-                "Personas",
-                "Juan David Pérez",
-              ],
-              ["María Gómez", "Registró pago $100.000", "Pagos", "#MAI-00184"],
-              [
-                "Carlos Rodríguez",
-                "Marcó asistencia",
-                "Universidad",
-                "Generación #12",
-              ],
-              [
-                "Sistema MAI",
-                "Generó certificado",
-                "Certificados",
-                "MAI-UV-2026-0184",
-              ],
-            ].map((r, i) => (
-              <tr key={r[1]}>
-                <td>
-                  <strong>{r[0]}</strong>
-                </td>
-                <td>{r[1]}</td>
-                <td>
-                  <StatusPill tone="pill-blue">{r[2]}</StatusPill>
-                </td>
-                <td>{r[3]}</td>
-                <td>
-                  0{8 - i} jul · {9 + i}:24
-                </td>
-                <td>190.84.***.**</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  )
-}
-
-function SettingsPanel() {
-  return (
-    <div className="settings-grid">
-      <aside className="panel settings-nav">
-        {[
-          "Información de Iglesia",
-          "Usuarios",
-          "Roles y permisos",
-          "Programas",
-          "Métodos de pago",
-          "Plantillas de documentos",
-          "Plantillas de certificados",
-          "Notificaciones",
-          "Almacenamiento",
-          "Configuración general",
-        ].map((x, i) => (
-          <button className={i === 2 ? "active" : ""} key={x}>
-            {x}
-            <AIcon name="arrow" />
-          </button>
-        ))}
-      </aside>
-      <section className="panel permission-panel">
-        <PanelTitle
-          kicker="Acceso y seguridad"
-          title="Roles y permisos"
-          action="Nuevo rol"
-        />
-        <p>
-          Define exactamente qué puede consultar, crear o modificar cada rol.
-        </p>
-        {[
-          "Super administrador",
-          "Administrador",
-          "Pastor",
-          "Líder",
-          "Profesor",
-          "Tesorería",
-          "Consulta",
-        ].map((role, i) => (
-          <div className="permission-row" key={role}>
-            <span className={`role-dot role-${i}`} />
-            <div>
-              <strong>{role}</strong>
-              <p>
-                {i === 0
-                  ? "Acceso total al sistema"
-                  : i === 3
-                    ? "Personas asignadas, encuentros y pagos"
-                    : i === 4
-                      ? "Cursos, estudiantes y asistencia"
-                      : "Permisos personalizados"}
-              </p>
-            </div>
-            <StatusPill tone={i === 0 ? "pill-warn" : "pill-blue"}>
-              {i === 0
-                ? "Protegido"
-                : `${[32, 28, 18, 14, 12, 8][i - 1] || 6} permisos`}
-            </StatusPill>
-            <button>
-              <AIcon name="more" />
-            </button>
-          </div>
-        ))}
-        <div className="granular-permissions">
-          <header>
-            <div>
-              <span>Personalización</span>
-              <h3>Permisos del rol · Líder</h3>
-            </div>
-            <button>Guardar permisos</button>
-          </header>
-          <div className="permission-matrix">
-            <div className="matrix-head">
-              <span>Módulo</span>
-              {[
-                "Ver",
-                "Crear",
-                "Editar",
-                "Eliminar",
-                "Exportar",
-                "Aprobar",
-              ].map((x) => (
-                <b key={x}>{x}</b>
-              ))}
-            </div>
-            {[
-              "Mis discípulos",
-              "Encuentros",
-              "Pagos",
-              "Universidad",
-              "Destino",
-            ].map((module, i) => (
-              <div className="matrix-row" key={module}>
-                <span>{module}</span>
-                {[0, 1, 2, 3, 4, 5].map((cell) => (
-                  <label key={cell}>
-                    <input
-                      type="checkbox"
-                      defaultChecked={cell < 3 || (cell === 4 && i < 3)}
-                      disabled={cell === 3}
-                    />
-                    <i />
-                  </label>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  )
-}
-
-function PageHeader({
+export function PageHeader({
   eyebrow,
   title,
   copy,
   primary,
   onPrimary,
+  onExport,
 }: {
   eyebrow: string
   title: string
   copy: string
-  primary: string
+  primary?: string
   onPrimary?: () => void
+  onExport?: () => void
 }) {
   return (
     <header className="module-header">
@@ -2534,14 +509,20 @@ function PageHeader({
         <h1>{title}</h1>
         <p>{copy}</p>
       </div>
-      <div>
-        <button className="secondary-action">
-          <AIcon name="download" /> Exportar
-        </button>
-        <button className="admin-primary" onClick={onPrimary}>
-          <AIcon name="plus" /> {primary}
-        </button>
-      </div>
+      {(onExport || primary) && (
+        <div>
+          {onExport && (
+            <button className="secondary-action" onClick={onExport}>
+              <AIcon name="download" /> Exportar
+            </button>
+          )}
+          {primary && (
+            <button className="admin-primary" onClick={onPrimary}>
+              <AIcon name="plus" /> {primary}
+            </button>
+          )}
+        </div>
+      )}
     </header>
   )
 }
@@ -2552,12 +533,14 @@ function Sidebar({
   open,
   close,
   logout,
+  alerts,
 }: {
   page: string
   go: (x: string) => void
   open: boolean
   close: () => void
   logout: () => void
+  alerts: number
 }) {
   const name = useContext(StaffName)
   const me = useContext(MyAccess)
@@ -2585,7 +568,7 @@ function Sidebar({
               >
                 <AIcon name={item.icon} />
                 <span>{item.label}</span>
-                {item.label === "Notificaciones" && <b>5</b>}
+                {item.label === "Notificaciones" && alerts > 0 && <b>{alerts}</b>}
               </button>
               {item.children && item.children.length > 0 && (
                 <div className="subnav">
@@ -2632,30 +615,41 @@ function AdminTopbar({
   page,
   menu,
   go,
+  search,
+  alerts,
 }: {
   page: string
   menu: () => void
   go: (s: string) => void
+  search: (q: string) => void
+  alerts: number
 }) {
   const name = useContext(StaffName)
   const me = useContext(MyAccess)
+  const [q, setQ] = useState("")
   return (
     <header className="admin-topbar">
       <button className="mobile-menu-btn" onClick={menu}>
         <AIcon name="menu" />
       </button>
-      <div className="global-search">
+      <form
+        className="global-search"
+        onSubmit={(e) => {
+          e.preventDefault()
+          search(q)
+        }}
+      >
         <AIcon name="search" />
-        <input placeholder="Buscar personas, pagos, cursos, documentos..." />
-        <kbd>⌘ K</kbd>
-      </div>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar personas por nombre, documento o teléfono..." />
+        <kbd>Enter</kbd>
+      </form>
       <div className="top-actions">
         <button
           onClick={() => go("Notificaciones")}
           className="notification-button"
         >
           <AIcon name="bell" />
-          <i />
+          {alerts > 0 && <i />}
         </button>
         <div className="top-user">
           <span className="user-initial">{name[0].toUpperCase()}</span>
@@ -2677,8 +671,8 @@ function MobileNav({ page, go, more }: { page: string; go: (s: string) => void; 
     [
       ["Dashboard", "home"],
       ["Personas", "people"],
-      ["Encuentros", "calendar"],
-      ["Pagos", "wallet"],
+      ["Mis discípulos", "team"],
+      ["Notificaciones", "bell"],
       ["Más", "more"],
     ] as [string, AdminIcon][]
   ).filter(([label]) => label === "Más" || canOpen(me, label))
@@ -2696,7 +690,7 @@ function MobileNav({ page, go, more }: { page: string; go: (s: string) => void; 
           key={label}
         >
           <AIcon name={icon} />
-          <span>{label === "Dashboard" ? "Inicio" : label}</span>
+          <span>{label === "Dashboard" ? "Inicio" : label === "Mis discípulos" ? "Discípulos" : label === "Notificaciones" ? "Avisos" : label}</span>
         </button>
       ))}
     </nav>
@@ -2723,37 +717,20 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
   }, [resetting, logged])
   const [page, setPage] = useState("Dashboard")
   const [sidebar, setSidebar] = useState(false)
-  const [personId, setPersonId] = useState<number | null>(null)
+  const [personId, setPersonId] = useState<string | null>(null)
+  const [query, setQuery] = useState("")
   const [route, setRoute] = useState(window.location.hash)
+  const { settings } = useSettings(me?.userId ?? "")
   useEffect(() => {
     const updateRoute = () => setRoute(window.location.hash)
     window.addEventListener("hashchange", updateRoute)
     return () => window.removeEventListener("hashchange", updateRoute)
   }, [])
-  const content = useMemo(() => {
-    if (!canOpen(me, page)) return <Dashboard go={setPage} />
-    if (personId)
-      return <PersonProfile id={personId} back={() => setPersonId(null)} />
-    if (page === "Dashboard") return <Dashboard go={setPage} />
-    if (page === "Personas") return <PeoplePage openPerson={setPersonId} />
-    if (page === "Sitio web") return <WebOverview go={setPage} />
-    if (page === "Anuncios") return <AdminAnnouncements go={setPage} />
-    if (webPages[page]) return <WebInbox kind={webPages[page]} />
-    if (page === "Encuentros") return <EncountersPage />
-    if (page === "Universidad de la Vida") return <UniversityPage />
-    if (page === "Pagos") return <PaymentsPage />
-    if (page === "Gastos") return <PaymentsPage expenses />
-    if (page === "Documentos") return <DocumentsPage />
-    if (page === "Certificados") return <DocumentsPage certificates />
-    if (page === "Usuarios") return <UsersPage />
-    if (page === "Invitaciones") return <UsersPage invitations />
-    return <GenericPage page={page} />
-  }, [page, personId, me])
   if (route.startsWith("#/registro/")) {
     return <InviteRegistration token={decodeURIComponent(route.slice("#/registro/".length).split(/[/?]/)[0])} onExit={onExit} />
   }
   if (route.startsWith("#/inscripcion/")) {
-    return <RegistrationOnboarding disciple onExit={onExit} />
+    return <DiscipleSignup code={decodeURIComponent(route.slice("#/inscripcion/".length).split(/[/?]/)[0])} onExit={onExit} />
   }
   if (checking) {
     return (
@@ -2771,22 +748,90 @@ export default function AdminApp({ onExit }: { onExit: () => void }) {
   }
   return (
     <MyAccess.Provider value={me}>
-    <StaffName.Provider value={name}>
+      <StaffName.Provider value={name}>
+        <SettingsContext.Provider value={settings}>
+          <AdminShell
+            page={page}
+            go={go}
+            sidebar={sidebar}
+            setSidebar={setSidebar}
+            personId={personId}
+            setPersonId={setPersonId}
+            query={query}
+            search={(q) => {
+              setQuery(q)
+              go("Personas")
+            }}
+            logout={() => signOut().finally(() => (setLogged(false), setMe(null)))}
+          />
+        </SettingsContext.Provider>
+      </StaffName.Provider>
+    </MyAccess.Provider>
+  )
+}
+
+/** The signed-in panel (inside the access, name and settings providers). */
+function AdminShell({
+  page,
+  go,
+  sidebar,
+  setSidebar,
+  personId,
+  setPersonId,
+  query,
+  search,
+  logout,
+}: {
+  page: string
+  go: (p: string) => void
+  sidebar: boolean
+  setSidebar: (open: boolean) => void
+  personId: string | null
+  setPersonId: (id: string | null) => void
+  query: string
+  search: (q: string) => void
+  logout: () => void
+}) {
+  const me = useContext(MyAccess)
+  const name = useContext(StaffName)
+  const alerts = useAlerts()
+  const count = alerts.data?.length ?? 0
+  const open = (id: string) => {
+    setPersonId(id)
+    window.scrollTo({ top: 0 })
+  }
+  let content: React.ReactNode
+  if (!canOpen(me, page)) content = <Dashboard go={go} name={name} />
+  else if (personId) content = <PersonProfile id={personId} back={() => setPersonId(null)} />
+  else if (page === "Dashboard") content = <Dashboard go={go} name={name} />
+  else if (page === "Personas") content = <PeoplePage openPerson={open} initialQuery={query} />
+  else if (page === "Sitio web") content = <WebOverview go={go} />
+  else if (page === "Anuncios") content = <AdminAnnouncements go={go} />
+  else if (webPages[page]) content = <WebInbox kind={webPages[page]} />
+  else if (page === "Líderes") content = <TeamPage leaders openPerson={open} />
+  else if (page === "Mis discípulos" || page === "Mi equipo") content = <TeamPage openPerson={open} />
+  else if (page === "Encuentros") content = <ProgramPage programId="encuentro" openPerson={open} />
+  else if (page === "Misión 180") content = <ProgramPage programId="mision180" openPerson={open} />
+  else if (page === "Capacitación Destino") content = <ProgramPage programId="destino" openPerson={open} />
+  else if (page === "Usuarios") content = <UsersPage />
+  else if (page === "Invitaciones") content = <UsersPage invitations />
+  else if (page === "Notificaciones") content = <NotificationsPage go={go} />
+  else if (page === "Configuración") content = <SettingsPage go={go} />
+  else if (page === "Pagos") content = <ComingSoon page="Pagos" icon="wallet" copy="Ingresos, abonos y comprobantes de cada persona." />
+  else if (page === "Gastos") content = <ComingSoon page="Gastos" icon="expense" copy="Egresos de la iglesia y de cada encuentro, con su soporte." />
+  else if (page === "Documentos") content = <ComingSoon page="Documentos" icon="file" copy="El archivo de documentos de MAI." />
+  else if (page === "Certificados") content = <ComingSoon page="Certificados" icon="certificate" copy="Certificados de Encuentro, Misión 180 y Destino." />
+  else if (page === "Reportes") content = <ComingSoon page="Reportes" icon="chart" copy="Indicadores conectados para tomar mejores decisiones." />
+  else if (page === "Auditoría") content = <ComingSoon page="Auditoría" icon="shield" copy="Quién hizo qué cambio y cuándo." />
+  else content = <Dashboard go={go} name={name} />
+  return (
     <main className="admin-app">
-      <Sidebar
-        page={page}
-        go={go}
-        open={sidebar}
-        close={() => setSidebar(false)}
-        logout={() => signOut().finally(() => (setLogged(false), setMe(null)))}
-      />
+      <Sidebar page={page} go={go} open={sidebar} close={() => setSidebar(false)} logout={logout} alerts={count} />
       <div className="admin-shell">
-        <AdminTopbar page={page} menu={() => setSidebar(true)} go={go} />
+        <AdminTopbar page={page} menu={() => setSidebar(true)} go={go} search={search} alerts={count} />
         <div className="admin-content">{content}</div>
       </div>
       <MobileNav page={page} go={go} more={() => setSidebar(true)} />
     </main>
-    </StaffName.Provider>
-    </MyAccess.Provider>
   )
 }

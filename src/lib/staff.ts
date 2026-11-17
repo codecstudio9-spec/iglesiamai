@@ -12,7 +12,7 @@ export const PERMISSIONS = [
   { id: "personas", label: "Personas", hint: "Directorio de la iglesia" },
   { id: "equipo", label: "Líderes y discípulos", hint: "Mi equipo" },
   { id: "encuentros", label: "Encuentros", hint: "Eventos e inscritos" },
-  { id: "universidad", label: "Universidad de la Vida", hint: "Cursos y estudiantes" },
+  { id: "universidad", label: "Misión 180", hint: "Generaciones y estudiantes" },
   { id: "capacitacion", label: "Capacitación Destino", hint: "Formación de líderes" },
   { id: "pagos", label: "Pagos", hint: "Ingresos y comprobantes" },
   { id: "gastos", label: "Gastos", hint: "Egresos de la iglesia" },
@@ -40,7 +40,11 @@ export type StaffMember = {
   isOwner: boolean
   createdAt: string
   approvedAt: string | null
+  photoPath: string | null
+  joinCode: string
 }
+
+export type InvitationKind = "persona" | "lider"
 
 export type Invitation = {
   id: string
@@ -48,6 +52,7 @@ export type Invitation = {
   email: string
   phone: string
   roleLabel: string
+  kind: InvitationKind
   expiresAt: string
   createdByName: string
   createdAt: string
@@ -71,6 +76,8 @@ type StaffRow = {
   is_owner: boolean
   created_at: string
   approved_at: string | null
+  photo_path: string | null
+  join_code: string | null
 }
 
 type InvitationRow = {
@@ -79,6 +86,7 @@ type InvitationRow = {
   email: string
   phone: string
   role_label: string
+  kind: InvitationKind
   expires_at: string
   created_by_name: string
   created_at: string
@@ -103,6 +111,8 @@ function toMember(r: StaffRow): StaffMember {
     isOwner: r.is_owner,
     createdAt: r.created_at,
     approvedAt: r.approved_at,
+    photoPath: r.photo_path ?? null,
+    joinCode: r.join_code ?? "",
   }
 }
 
@@ -138,7 +148,7 @@ export async function setStaffAccess(userId: string, status: StaffStatus, permis
 export async function listInvitations(): Promise<Invitation[]> {
   const { data, error } = await supabase
     .from("invitations")
-    .select("id,name,email,phone,role_label,expires_at,created_by_name,created_at,used_at,revoked_at")
+    .select("id,name,email,phone,role_label,kind,expires_at,created_by_name,created_at,used_at,revoked_at")
     .order("created_at", { ascending: false })
   if (error) throw error
   return (data as InvitationRow[]).map((r) => ({
@@ -147,6 +157,7 @@ export async function listInvitations(): Promise<Invitation[]> {
     email: r.email,
     phone: r.phone,
     roleLabel: r.role_label,
+    kind: r.kind ?? "persona",
     expiresAt: r.expires_at,
     createdByName: r.created_by_name,
     createdAt: r.created_at,
@@ -184,6 +195,9 @@ export async function createInvitation(input: {
   roleLabel: string
   days: number
   createdByName: string
+  /** "lider": the account is active as soon as it is created, with these permissions. */
+  kind?: InvitationKind
+  autoPermissions?: Permission[]
 }) {
   const token = randomToken()
   const { error } = await supabase.from("invitations").insert({
@@ -192,6 +206,8 @@ export async function createInvitation(input: {
     email: input.email.trim(),
     phone: input.phone.trim(),
     role_label: input.roleLabel,
+    kind: input.kind ?? "persona",
+    auto_permissions: input.kind === "lider" ? (input.autoPermissions ?? []).filter((p) => p !== "usuarios") : [],
     expires_at: new Date(Date.now() + input.days * 86_400_000).toISOString(),
     created_by_name: input.createdByName,
   })
@@ -213,7 +229,7 @@ export const onInvitationsChange = (cb: () => void) => onTableChange("invitation
 /* Public side: the invited person (no session yet)                  */
 /* ---------------------------------------------------------------- */
 
-export type InvitationPreview = { name: string; email: string; phone: string; roleLabel: string }
+export type InvitationPreview = { name: string; email: string; phone: string; roleLabel: string; kind: InvitationKind }
 
 export async function readInvitation(token: string): Promise<InvitationPreview> {
   const res = await fetch("/api/registro", {
@@ -237,6 +253,8 @@ export type RegistrationData = {
   email: string
   username: string
   password: string
+  /** Optional photo as a data URL (already reduced in the browser). */
+  photo?: string
 }
 
 export async function acceptInvitation(data: RegistrationData) {
@@ -247,6 +265,7 @@ export async function acceptInvitation(data: RegistrationData) {
   })
   const body = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(body.error || "No pudimos crear tu cuenta. Inténtalo de nuevo.")
+  return body as { ok: true; username: string; active: boolean }
 }
 
 export const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/

@@ -338,7 +338,7 @@ function HeroSlides({ active }: { active: number }) {
       {heroSlides.map((slide, i) => (
         <img
           key={slide.src}
-          className={`${i === active ? "is-active" : ""} ${slide.shrink ? "is-shrunk" : ""}`}
+          className={`${i === active ? "is-active" : ""} ${slide.shrink ? "is-shrunk" : ""} ${slide.shrink || slide.wide ? "is-framed" : ""}`}
           src={slide.src}
           alt={i === active ? slide.alt : ""}
           aria-hidden={i !== active}
@@ -774,6 +774,10 @@ function HomePage() {
               </div>
             ))}
           </div>
+          {/* Phones: one short fixed welcome so the photos of the pastors and leaders stay visible */}
+          <p className="hero-mobile-text" aria-hidden="true">
+            Bienvenido a MAI, <em>aquí tienes familia.</em>
+          </p>
           <div className="button-row">
             <Button href={to("nosotros")} variant="light">
               Quiero conocer MAI

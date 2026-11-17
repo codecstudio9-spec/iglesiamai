@@ -235,7 +235,7 @@ begin
   select name into who_name from public.staff where user_id = who;
   label := coalesce(r ->> 'full_name', r ->> 'person_name', r ->> 'title', r ->> 'concept', r ->> 'name', r ->> 'key', r ->> 'number', '');
   if tg_table_name = 'payments' or tg_table_name = 'expenses' then
-    label := trim(both ' ' from label || ' · $' || to_char((r ->> 'amount')::bigint, 'FM999G999G999'));
+    label := trim(both ' ' from label || ' · $' || replace(to_char((r ->> 'amount')::bigint, 'FM999,999,999'), ',', '.'));
   end if;
   if tg_op = 'UPDATE' then
     for k in select key from jsonb_each(row_new) loop

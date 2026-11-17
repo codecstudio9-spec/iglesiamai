@@ -60,6 +60,21 @@ export type GeneralSettings = {
   discipleWelcome: string
 }
 
+export type DocTemplate = { id: string; name: string; category: string; body: string }
+
+export type CertTemplate = {
+  id: string
+  name: string
+  program: string
+  title: string
+  text: string
+  signer1: string
+  signer1Role: string
+  signer2: string
+  signer2Role: string
+  color: string
+}
+
 export type Settings = {
   iglesia: ChurchInfo
   roles: RolePreset[]
@@ -67,6 +82,8 @@ export type Settings = {
   metodos_pago: PaymentMethod[]
   notificaciones: NotificationPrefs
   general: GeneralSettings
+  plantillas_documentos: DocTemplate[]
+  plantillas_certificados: CertTemplate[]
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -109,6 +126,34 @@ export const DEFAULT_SETTINGS: Settings = {
     approveDisciples: true,
     discipleWelcome: "Completa tus datos para empezar tu proceso en MAI. Tu líder te va a acompañar en cada paso.",
   },
+  plantillas_documentos: [
+    {
+      id: "membresia",
+      name: "Constancia de membresía",
+      category: "Persona",
+      body:
+        "La {{iglesia}}, identificada con NIT {{nit}}, hace constar que {{nombre}}, identificado(a) con {{tipo_documento}} No. {{documento}}, es miembro activo de nuestra congregación y participa con fidelidad de nuestras reuniones y actividades.\n\nEsta constancia se expide a solicitud del interesado(a) en Bogotá, el {{fecha}}.",
+    },
+    {
+      id: "recomendacion",
+      name: "Carta de recomendación",
+      category: "Persona",
+      body:
+        "A quien pueda interesar:\n\nLa {{iglesia}} se permite recomendar a {{nombre}}, identificado(a) con {{tipo_documento}} No. {{documento}}, quien hace parte de nuestra familia y es acompañado(a) por su líder {{lider}}.\n\nDurante este tiempo ha demostrado ser una persona responsable, respetuosa y comprometida, por lo que no dudamos en recomendarla.\n\nPara cualquier información adicional pueden comunicarse con nosotros en {{direccion_iglesia}}.\n\nBogotá, {{fecha}}.",
+    },
+    {
+      id: "participacion",
+      name: "Constancia de participación",
+      category: "Formación",
+      body:
+        "La {{iglesia}} hace constar que {{nombre}}, identificado(a) con {{tipo_documento}} No. {{documento}}, participa en el proceso {{programa}} y actualmente se encuentra en la etapa: {{etapa}}.\n\nSe expide en Bogotá, el {{fecha}}.",
+    },
+  ],
+  plantillas_certificados: [
+    { id: "cert-encuentro", name: "Encuentro", program: "encuentro", title: "Certificado de Encuentro", text: "Por haber vivido el Encuentro con Dios y dar el primer paso de su proceso en MAI.", signer1: "", signer1Role: "Pastor principal", signer2: "", signer2Role: "Pastora", color: "#168c9c" },
+    { id: "cert-mision180", name: "Misión 180", program: "mision180", title: "Certificado de Graduación", text: "Por haber culminado con éxito la formación Misión 180.", signer1: "", signer1Role: "Pastor principal", signer2: "", signer2Role: "Coordinador de formación", color: "#c8754e" },
+    { id: "cert-destino", name: "Capacitación Destino", program: "destino", title: "Certificado de Capacitación", text: "Por haber completado la Capacitación Destino y estar listo(a) para servir y multiplicar.", signer1: "", signer1Role: "Pastor principal", signer2: "", signer2Role: "Coordinador de formación", color: "#123b4a" },
+  ],
 }
 
 export type SettingsKey = keyof Settings

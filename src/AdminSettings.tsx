@@ -6,12 +6,16 @@ import { useContext, useEffect, useState } from "react"
 import { AIcon, PageHeader, PanelTitle, StatusPill } from "./AdminApp"
 import { MyAccess } from "./AdminUsers"
 import { useLiveData } from "./AdminPeople"
+import { CertificatePreview } from "./AdminRecords"
+import { DOCUMENT_CATEGORIES, PLACEHOLDERS } from "./lib/records"
 import {
   newId,
   saveSetting,
   SettingsContext,
   storageUsage,
+  type CertTemplate,
   type ChurchInfo,
+  type DocTemplate,
   type GeneralSettings,
   type NotificationPrefs,
   type PaymentMethod,
@@ -389,21 +393,154 @@ function PaymentsSection() {
   )
 }
 
-function TemplatesSection({ certificates }: { certificates: boolean }) {
+function DocTemplatesSection() {
+  const d = useDraft("plantillas_documentos")
+  const [open, setOpen] = useState<string | null>(null)
+  const list = d.draft
+  const update = (id: string, patch: Partial<DocTemplate>) => d.setDraft(list.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+  function add() {
+    const t: DocTemplate = { id: newId(), name: "Nueva plantilla", category: "General", body: "La {{iglesia}} hace constar que {{nombre}}, identificado(a) con {{tipo_documento}} No. {{documento}}, ...\n\nBogotá, {{fecha}}." }
+    d.setDraft([...list, t])
+    setOpen(t.id)
+  }
+  function insert(id: string, key: string) {
+    const area = document.getElementById(`tpl-${id}`) as HTMLTextAreaElement | null
+    const t = list.find((x) => x.id === id)
+    if (!t) return
+    const at = area?.selectionStart ?? t.body.length
+    update(id, { body: `${t.body.slice(0, at)}{{${key}}}${t.body.slice(area?.selectionEnd ?? at)}` })
+  }
   return (
     <section className="panel permission-panel">
-      <PanelTitle kicker="Documentos" title={certificates ? "Plantillas de certificados" : "Plantillas de documentos"} />
-      <div className="coming-soon coming-soon-inline">
-        <span>
-          <AIcon name={certificates ? "certificate" : "file"} />
-        </span>
-        <h2>Llega en la próxima fase</h2>
-        <p>
-          {certificates
-            ? "Aquí vas a diseñar los certificados de Encuentro, Misión 180 y Destino, y generarlos en PDF con el nombre de cada persona."
-            : "Aquí vas a crear cartas, constancias y formatos que se llenan solos con los datos de cada persona."}
-        </p>
-      </div>
+      <PanelTitle kicker="Documentos" title="Plantillas de documentos" action="Nueva plantilla" onAction={add} />
+      <p>Cartas y constancias que se llenan solas con los datos de cada persona. Se generan desde Documentos o desde el perfil de la persona.</p>
+      {list.map((t) => (
+        <div key={t.id} className="role-block">
+          <div className="permission-row">
+            <span className="role-dot" />
+            <div>
+              <strong>{t.name}</strong>
+              <p>{t.category}</p>
+            </div>
+            <button className="role-edit" onClick={() => setOpen(open === t.id ? null : t.id)}>
+              {open === t.id ? "Cerrar" : "Editar"}
+            </button>
+          </div>
+          {open === t.id && (
+            <div className="role-editor">
+              <div className="invite-fields">
+                <Field label="Nombre">
+                  <input value={t.name} onChange={(e) => update(t.id, { name: e.target.value })} />
+                </Field>
+                <Field label="Categoría">
+                  <select value={t.category} onChange={(e) => update(t.id, { category: e.target.value })}>
+                    {DOCUMENT_CATEGORIES.map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Texto del documento" full>
+                  <textarea id={`tpl-${t.id}`} rows={9} value={t.body} onChange={(e) => update(t.id, { body: e.target.value })} />
+                </Field>
+              </div>
+              <p className="muted-note">Toca un dato para insertarlo donde está el cursor:</p>
+              <div className="placeholder-chips">
+                {PLACEHOLDERS.map(([k, label]) => (
+                  <button key={k} type="button" onClick={() => insert(t.id, k)} title={`{{${k}}}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button className="access-reject" onClick={() => d.setDraft(list.filter((x) => x.id !== t.id))}>
+                Eliminar esta plantilla
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+      {list.length === 0 && <p className="muted-note">No hay plantillas. Crea la primera con “Nueva plantilla”.</p>}
+      <SaveBar {...d} save={() => d.save()} />
+    </section>
+  )
+}
+
+function CertTemplatesSection() {
+  const settings = useContext(SettingsContext)
+  const d = useDraft("plantillas_certificados")
+  const [open, setOpen] = useState<string | null>(null)
+  const list = d.draft
+  const update = (id: string, patch: Partial<CertTemplate>) => d.setDraft(list.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+  function add() {
+    const t: CertTemplate = { id: newId(), name: "Nuevo certificado", program: "", title: "Certificado", text: "Por su participación en ...", signer1: "", signer1Role: "Pastor principal", signer2: "", signer2Role: "", color: "#168c9c" }
+    d.setDraft([...list, t])
+    setOpen(t.id)
+  }
+  return (
+    <section className="panel permission-panel">
+      <PanelTitle kicker="Certificados" title="Plantillas de certificados" action="Nueva plantilla" onAction={add} />
+      <p>Diseño, texto y firmas de cada certificado. Se emiten desde Certificados o desde el perfil de la persona.</p>
+      {list.map((t) => (
+        <div key={t.id} className="role-block">
+          <div className="permission-row">
+            <span className="role-dot" style={{ background: t.color }} />
+            <div>
+              <strong>{t.name}</strong>
+              <p>
+                {t.title}
+                {t.program ? ` · ${settings.programas.find((p) => p.id === t.program)?.name ?? ""}` : ""}
+              </p>
+            </div>
+            <button className="role-edit" onClick={() => setOpen(open === t.id ? null : t.id)}>
+              {open === t.id ? "Cerrar" : "Editar"}
+            </button>
+          </div>
+          {open === t.id && (
+            <div className="role-editor">
+              <CertificatePreview template={t} />
+              <div className="invite-fields">
+                <Field label="Nombre de la plantilla">
+                  <input value={t.name} onChange={(e) => update(t.id, { name: e.target.value })} />
+                </Field>
+                <Field label="Programa">
+                  <select value={t.program} onChange={(e) => update(t.id, { program: e.target.value })}>
+                    <option value="">Ninguno</option>
+                    {settings.programas.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Título">
+                  <input value={t.title} onChange={(e) => update(t.id, { title: e.target.value })} />
+                </Field>
+                <Field label="Color">
+                  <input type="color" value={t.color} onChange={(e) => update(t.id, { color: e.target.value })} />
+                </Field>
+                <Field label="Texto del reconocimiento" full>
+                  <textarea rows={3} value={t.text} onChange={(e) => update(t.id, { text: e.target.value })} />
+                </Field>
+                <Field label="Firma 1 · nombre">
+                  <input value={t.signer1} onChange={(e) => update(t.id, { signer1: e.target.value })} placeholder="Nombre del pastor" />
+                </Field>
+                <Field label="Firma 1 · cargo">
+                  <input value={t.signer1Role} onChange={(e) => update(t.id, { signer1Role: e.target.value })} />
+                </Field>
+                <Field label="Firma 2 · nombre">
+                  <input value={t.signer2} onChange={(e) => update(t.id, { signer2: e.target.value })} placeholder="Opcional" />
+                </Field>
+                <Field label="Firma 2 · cargo">
+                  <input value={t.signer2Role} onChange={(e) => update(t.id, { signer2Role: e.target.value })} placeholder="Opcional" />
+                </Field>
+              </div>
+              <button className="access-reject" onClick={() => d.setDraft(list.filter((x) => x.id !== t.id))}>
+                Eliminar esta plantilla
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+      <SaveBar {...d} save={() => d.save()} />
     </section>
   )
 }
@@ -440,7 +577,8 @@ function NotificationsSection() {
 const BUCKETS: Record<string, string> = {
   fotos: "Fotos de personas y del equipo",
   anuncios: "Imágenes de anuncios del sitio",
-  comprobantes: "Comprobantes de pago e inscripciones",
+  comprobantes: "Comprobantes de inscripciones del sitio web",
+  soportes: "Soportes de pagos, gastos y documentos",
 }
 
 function formatBytes(b: number) {
@@ -565,8 +703,8 @@ export default function SettingsPage({ go }: { go: (page: string) => void }) {
         {section === "Roles y permisos" && <RolesSection />}
         {section === "Programas" && <ProgramsSection />}
         {section === "Métodos de pago" && <PaymentsSection />}
-        {section === "Plantillas de documentos" && <TemplatesSection certificates={false} />}
-        {section === "Plantillas de certificados" && <TemplatesSection certificates />}
+        {section === "Plantillas de documentos" && <DocTemplatesSection />}
+        {section === "Plantillas de certificados" && <CertTemplatesSection />}
         {section === "Notificaciones" && <NotificationsSection />}
         {section === "Almacenamiento" && <StorageSection />}
         {section === "Configuración general" && <GeneralSection />}

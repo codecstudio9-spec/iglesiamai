@@ -4,8 +4,9 @@ import WebInbox, { WebOverview, webPages } from "./AdminWebInbox"
 import AdminAnnouncements from "./AdminAnnouncements"
 import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn, signOut, staffName } from "./lib/auth"
 import { InviteRegistration, MyAccess, UsersPage } from "./AdminUsers"
-import { ComingSoon, Dashboard, DiscipleSignup, NotificationsPage, PeoplePage, PersonProfile, ProgramPage, TeamPage, useAlerts } from "./AdminPeople"
+import { Dashboard, DiscipleSignup, NotificationsPage, PeoplePage, PersonProfile, ProgramPage, TeamPage, useAlerts } from "./AdminPeople"
 import SettingsPage from "./AdminSettings"
+import { AuditPage, CertificatesPage, DocumentsPage, ExpensesPage, PaymentsPage, ReportsPage } from "./AdminRecords"
 import { SettingsContext, useSettings } from "./lib/settings"
 import { can, myAccess, type Permission, type StaffMember } from "./lib/staff"
 
@@ -817,12 +818,12 @@ function AdminShell({
   else if (page === "Invitaciones") content = <UsersPage invitations />
   else if (page === "Notificaciones") content = <NotificationsPage go={go} />
   else if (page === "Configuración") content = <SettingsPage go={go} />
-  else if (page === "Pagos") content = <ComingSoon page="Pagos" icon="wallet" copy="Ingresos, abonos y comprobantes de cada persona." />
-  else if (page === "Gastos") content = <ComingSoon page="Gastos" icon="expense" copy="Egresos de la iglesia y de cada encuentro, con su soporte." />
-  else if (page === "Documentos") content = <ComingSoon page="Documentos" icon="file" copy="El archivo de documentos de MAI." />
-  else if (page === "Certificados") content = <ComingSoon page="Certificados" icon="certificate" copy="Certificados de Encuentro, Misión 180 y Destino." />
-  else if (page === "Reportes") content = <ComingSoon page="Reportes" icon="chart" copy="Indicadores conectados para tomar mejores decisiones." />
-  else if (page === "Auditoría") content = <ComingSoon page="Auditoría" icon="shield" copy="Quién hizo qué cambio y cuándo." />
+  else if (page === "Pagos") content = <PaymentsPage />
+  else if (page === "Gastos") content = <ExpensesPage />
+  else if (page === "Documentos") content = <DocumentsPage />
+  else if (page === "Certificados") content = <CertificatesPage />
+  else if (page === "Reportes") content = <ReportsPage />
+  else if (page === "Auditoría") content = <AuditPage />
   else content = <Dashboard go={go} name={name} />
   return (
     <main className="admin-app">

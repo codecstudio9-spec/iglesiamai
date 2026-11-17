@@ -6,6 +6,7 @@
 import { FormEvent, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import QRCode from "qrcode"
 import { AdminLogo, AIcon, PageHeader, PanelTitle, StatusPill, type AdminIcon } from "./AdminApp"
+import { PersonRecords } from "./AdminRecords"
 import { MyAccess } from "./AdminUsers"
 import {
   blobToDataUrl,
@@ -717,6 +718,7 @@ export function PersonProfile({ id, back }: { id: string; back: () => void }) {
           </dl>
         </aside>
       </div>
+      <PersonRecords person={p} />
       {canDelete && (
         <section className="danger-zone">
           {confirmDelete ? (

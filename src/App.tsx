@@ -421,6 +421,9 @@ function Footer() {
             <em>un corazón a la vez.</em>
           </p>
           <SocialLinks />
+          <a href="#/admin" className="footer-access">
+            Acceder <Icon name="arrow" />
+          </a>
         </div>
         <div className="footer-col">
           <p>Navegación</p>
@@ -460,7 +463,6 @@ function Footer() {
         <a href="https://www.codecstudio.online/" target="_blank" rel="noreferrer" className="footer-credit">
           Diseñado por <strong>Codec Studio</strong>
         </a>
-        <a href="#/admin">Acceso interno</a>
         <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }) }}>
           Volver arriba ↑
         </a>
@@ -774,10 +776,6 @@ function HomePage() {
               </div>
             ))}
           </div>
-          {/* Phones: one short fixed welcome so the photos of the pastors and leaders stay visible */}
-          <p className="hero-mobile-text" aria-hidden="true">
-            Bienvenido a MAI, <em>aquí tienes familia.</em>
-          </p>
           <div className="button-row">
             <Button href={to("nosotros")} variant="light">
               Quiero conocer MAI

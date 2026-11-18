@@ -80,6 +80,7 @@ export function cardLayout(item: CardItem, hasImage: boolean) {
   return hasImage ? item.layout || "lateral" : "lateral"
 }
 
+/** The main button (the popup closes with the X, so there is no "Ahora no"). */
 function CtaButtons({ item, onCta, onLater, later = true }: { item: CardItem; onCta?: () => void; onLater?: () => void; later?: boolean }) {
   if (item.ctaType === "ninguno")
     return later ? (
@@ -96,11 +97,6 @@ function CtaButtons({ item, onCta, onLater, later = true }: { item: CardItem; on
       ) : (
         <button className="button button-primary" onClick={onCta}>
           {item.ctaLabel || "Inscríbete aquí"} <Icon name="arrow" />
-        </button>
-      )}
-      {later && (
-        <button className="announce-later" onClick={onLater}>
-          Ahora no
         </button>
       )}
     </>
@@ -172,7 +168,7 @@ export function AnnouncementCard({
           {item.description && <p className="announce-text">{item.description}</p>}
           <div className="announce-actions">
             {item.price && <span className="announce-chip">{item.price}</span>}
-            <CtaButtons item={item} onCta={onCta} onLater={onLater} />
+            <CtaButtons item={item} onCta={onCta} onLater={onLater} later={false} />
           </div>
         </div>
       </div>

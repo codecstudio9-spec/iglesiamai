@@ -9,12 +9,18 @@ import { notifyChange, onTableChange, supabase } from "./supabase"
 
 export type CtaType = "inscripcion" | "enlace" | "ninguno"
 
+/** lateral: flyer beside the text · horizontal: wide image with the text over its bottom · imagen: only the image */
+export type AnnouncementLayout = "lateral" | "horizontal" | "imagen"
+
 export type Announcement = {
   id: string
   kicker: string
   title: string
   description: string
   imageId: string | null
+  /** Vertical version for phones (falls back to imageId). */
+  mobileImageId: string | null
+  layout: AnnouncementLayout
   eventDate: string
   eventTime: string
   location: string
@@ -38,6 +44,8 @@ export const emptyAnnouncement: AnnouncementDraft = {
   title: "",
   description: "",
   imageId: null,
+  mobileImageId: null,
+  layout: "lateral",
   eventDate: "",
   eventTime: "",
   location: "",
@@ -58,6 +66,8 @@ type Row = {
   title: string
   description: string
   image_path: string | null
+  mobile_image_path: string | null
+  layout: AnnouncementLayout | null
   event_date: string | null
   event_time: string
   location: string
@@ -80,6 +90,8 @@ const fromRow = (r: Row): Announcement => ({
   title: r.title,
   description: r.description,
   imageId: r.image_path,
+  mobileImageId: r.mobile_image_path ?? null,
+  layout: r.layout ?? "lateral",
   eventDate: r.event_date ?? "",
   eventTime: r.event_time,
   location: r.location,
@@ -101,6 +113,8 @@ const toRow = (d: AnnouncementDraft) => ({
   title: d.title,
   description: d.description,
   image_path: d.imageId,
+  mobile_image_path: d.mobileImageId,
+  layout: d.layout,
   event_date: d.eventDate || null,
   event_time: d.eventTime,
   location: d.location,
@@ -151,6 +165,7 @@ export async function setAnnouncementActive(id: string, active: boolean) {
 export async function deleteAnnouncement(id: string) {
   const item = await getAnnouncement(id)
   if (item?.imageId) await deleteFile(item.imageId).catch(() => undefined)
+  if (item?.mobileImageId) await deleteFile(item.mobileImageId).catch(() => undefined)
   const { error } = await supabase.from("announcements").delete().eq("id", id)
   if (error) throw error
   notifyChange("announcements")

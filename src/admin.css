@@ -843,3 +843,30 @@ img.cert-logo { width: auto; height: 34px; margin: 0 auto 8px; border: 0; border
   .print-root .cert-print { page: cert; width: 297mm; height: 209mm; }
   .print-root .receipt-sheet, .print-root .doc-sheet { width: 210mm; min-height: 296mm; }
 }
+
+/* Announcement editor: layout picker, two images, desktop/phone preview */
+.ann-layouts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+.ann-layouts button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; border: 1px solid var(--a-line); padding: 12px; background: white; text-align: left; }
+.ann-layouts button.active { border-color: var(--a-teal); background: #f1f8f8; box-shadow: inset 0 0 0 1px var(--a-teal); }
+.ann-layouts strong { color: var(--a-text); font-size: 13px; }
+.ann-layouts small { color: var(--a-muted); font-size: 12px !important; line-height: 1.35 !important; }
+.ann-layout-icon { position: relative; display: flex; width: 64px; height: 42px; gap: 4px; margin-bottom: 6px; border: 1px solid #c7d6d6; padding: 4px; background: white; }
+.ann-layout-icon b { display: block; background: #9fc6ca; }
+.ann-layout-icon span { display: block; flex: 1; background: repeating-linear-gradient(#dfe7e7 0 3px, transparent 3px 7px); }
+.ann-layout-lateral b { width: 40%; }
+.ann-layout-horizontal b, .ann-layout-imagen b { position: absolute; inset: 4px; }
+.ann-layout-horizontal span { position: absolute; right: 4px; bottom: 4px; left: 4px; height: 13px; background: repeating-linear-gradient(#0b1220 0 3px, #4b6e74 3px 6px); opacity: .85; }
+.ann-layout-imagen span { position: absolute; bottom: 7px; left: 50%; width: 22px; height: 7px; flex: none; border-radius: 4px; background: var(--a-warm); transform: translateX(-50%); }
+.ann-image-pair { display: grid; gap: 16px; }
+.ann-image-field > div:last-child > strong { display: block; margin-bottom: 8px; color: var(--a-text); font-size: 14px; }
+.ann-image-preview.is-wide { width: 150px; height: 90px; }
+.ann-image-preview.is-tall { width: 76px; height: 130px; }
+.ann-warning { margin: 12px 0 0; padding: 10px 12px; background: #fbf1ea; color: #9a5530; font-size: 13px; }
+.ann-live-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.ann-live-head > span { color: var(--a-muted); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+.ann-device { display: flex; border: 1px solid var(--a-line); background: white; }
+.ann-device button { min-height: 32px; border: 0; padding: 0 12px; background: none; color: var(--a-muted); font-size: 12px; }
+.ann-device button.active { background: var(--a-ink); color: white; }
+.ann-live-frame.is-phone-frame { width: 340px; max-width: 100%; margin: 0 auto; border: 8px solid #10161f; border-radius: 26px; }
+.ann-live-imagen, .ann-live-horizontal { background: #0b1220; }
+@media (max-width: 640px) { .ann-layouts { grid-template-columns: 1fr; } }

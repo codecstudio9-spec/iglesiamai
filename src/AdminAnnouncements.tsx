@@ -10,6 +10,7 @@ import {
   setAnnouncementActive,
   type Announcement,
   type AnnouncementDraft,
+  type AnnouncementLayout,
   type CtaType,
 } from "./lib/announcements"
 import { compressImage, deleteFile, MAX_UPLOAD_BYTES, putFile } from "./lib/files"
@@ -80,11 +81,12 @@ function Editor({
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [newImages, setNewImages] = useState<string[]>([])
+  const [previewPhone, setPreviewPhone] = useState(false)
 
   const set = <K extends keyof AnnouncementDraft>(key: K, value: AnnouncementDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }))
 
-  async function onImage(file: File | undefined) {
+  async function onImage(file: File | undefined, key: "imageId" | "mobileImageId" = "imageId") {
     if (!file) return
     if (file.size > MAX_UPLOAD_BYTES * 2) {
       setError("La imagen es muy pesada (máximo 16 MB).")
@@ -93,7 +95,8 @@ function Editor({
     try {
       const id = await putFile(await compressImage(file, 1800), "anuncios")
       setNewImages((ids) => [...ids, id])
-      set("imageId", id)
+      set(key, id)
+      if (key === "mobileImageId") setPreviewPhone(true)
     } catch {
       setError("No pudimos subir la imagen. Revisa tu conexión e inténtalo de nuevo.")
     }
@@ -120,10 +123,22 @@ function Editor({
       return setError("No pudimos guardar el anuncio. Revisa tu conexión e inténtalo de nuevo.")
     }
     // Saved: now remove images replaced during this edit (and the previous one if changed).
-    const unused = newImages.filter((id) => id !== draft.imageId)
+    const unused = newImages.filter((id) => id !== draft.imageId && id !== draft.mobileImageId)
     if (initial.imageId && initial.imageId !== draft.imageId) unused.push(initial.imageId)
+    if (initial.mobileImageId && initial.mobileImageId !== draft.mobileImageId) unused.push(initial.mobileImageId)
     await Promise.all(unused.map((id) => deleteFile(id).catch(() => undefined)))
     onClose()
+  }
+
+  const layouts: [AnnouncementLayout, string, string][] = [
+    ["lateral", "Flyer al lado del texto", "Para imágenes verticales o cuadradas"],
+    ["horizontal", "Texto sobre la imagen", "Imagen horizontal con el texto abajo"],
+    ["imagen", "Solo la imagen", "Sin texto; el botón va sobre la imagen"],
+  ]
+  const tips: Record<AnnouncementLayout, string> = {
+    lateral: "Computador: vertical o cuadrada (1080 × 1350 o 1080 × 1080).",
+    horizontal: "Computador: horizontal (1920 × 1080). Deja libre la parte de abajo: ahí va el texto.",
+    imagen: "Computador: horizontal (1920 × 1080). Incluye en la imagen toda la información del evento.",
   }
 
   const ctaOptions: [CtaType, string][] = [
@@ -163,23 +178,62 @@ function Editor({
             Descripción
             <textarea rows={4} value={draft.description} onChange={(e) => set("description", e.target.value)} placeholder="Cuenta de qué se trata, a quién va dirigido y por qué no se lo pueden perder." />
           </label>
-          <div className="ann-image-field">
-            <div className="ann-image-preview">
-              <Thumb id={draft.imageId} />
+        </fieldset>
+
+        <fieldset>
+          <legend>Diseño e imágenes</legend>
+          <div className="ann-layouts">
+            {layouts.map(([value, label, hint]) => (
+              <button type="button" key={value} className={draft.layout === value ? "active" : ""} onClick={() => set("layout", value)}>
+                <i className={`ann-layout-icon ann-layout-${value}`}>
+                  <b />
+                  <span />
+                </i>
+                <strong>{label}</strong>
+                <small>{hint}</small>
+              </button>
+            ))}
+          </div>
+          <div className="ann-image-pair">
+            <div className="ann-image-field">
+              <div className={`ann-image-preview ${draft.layout === "lateral" ? "" : "is-wide"}`}>
+                <Thumb id={draft.imageId} />
+              </div>
+              <div>
+                <strong>Imagen para computador</strong>
+                <label className="ann-upload">
+                  <input type="file" accept="image/*" onChange={(e) => onImage(e.target.files?.[0])} />
+                  {draft.imageId ? "Cambiar imagen" : "Subir imagen o flyer"}
+                </label>
+                {draft.imageId && (
+                  <button type="button" className="ann-link-danger" onClick={() => set("imageId", null)}>
+                    Quitar imagen
+                  </button>
+                )}
+                <small>{tips[draft.layout]}</small>
+              </div>
             </div>
-            <div>
-              <label className="ann-upload">
-                <input type="file" accept="image/*" onChange={(e) => onImage(e.target.files?.[0])} />
-                {draft.imageId ? "Cambiar imagen" : "Subir imagen o flyer"}
-              </label>
-              {draft.imageId && (
-                <button type="button" className="ann-link-danger" onClick={() => set("imageId", null)}>
-                  Quitar imagen
-                </button>
-              )}
-              <small>Recomendado: vertical o cuadrada, como un flyer de Instagram.</small>
+            <div className="ann-image-field">
+              <div className="ann-image-preview is-tall">
+                <Thumb id={draft.mobileImageId} />
+              </div>
+              <div>
+                <strong>Imagen vertical para celular</strong>
+                <label className="ann-upload">
+                  <input type="file" accept="image/*" onChange={(e) => onImage(e.target.files?.[0], "mobileImageId")} />
+                  {draft.mobileImageId ? "Cambiar imagen" : "Subir imagen vertical"}
+                </label>
+                {draft.mobileImageId && (
+                  <button type="button" className="ann-link-danger" onClick={() => set("mobileImageId", null)}>
+                    Quitar imagen
+                  </button>
+                )}
+                <small>Celular: vertical (1080 × 1350 o 1080 × 1920). Si no la subes, se usa la de computador.</small>
+              </div>
             </div>
           </div>
+          {draft.layout !== "lateral" && !draft.imageId && <p className="ann-warning">Este diseño necesita una imagen. Sin imagen se muestra solo el texto.</p>}
+          {draft.layout === "imagen" && <small>En “Solo la imagen” no se muestran el título ni la descripción; el título sirve para identificar el anuncio.</small>}
         </fieldset>
 
         <fieldset>
@@ -283,9 +337,19 @@ function Editor({
       </form>
 
       <aside className="ann-live">
-        <span>Vista previa en la página</span>
-        <div className="ann-live-frame">
-          <AnnouncementCard item={draft} preview />
+        <div className="ann-live-head">
+          <span>Vista previa en la página</span>
+          <div className="ann-device">
+            <button type="button" className={previewPhone ? "" : "active"} onClick={() => setPreviewPhone(false)}>
+              Computador
+            </button>
+            <button type="button" className={previewPhone ? "active" : ""} onClick={() => setPreviewPhone(true)}>
+              Celular
+            </button>
+          </div>
+        </div>
+        <div className={`ann-live-frame ${previewPhone ? "is-phone-frame" : ""} ann-live-${draft.layout}`}>
+          <AnnouncementCard item={draft} preview phone={previewPhone} />
         </div>
       </aside>
     </div>

@@ -60,45 +60,137 @@ export function useActiveAnnouncements() {
 
 /* ------------------------------------------------------------------ */
 
+type CardItem = Announcement | (Omit<Announcement, "id" | "createdAt" | "updatedAt"> & { id?: string })
+
+/** True on phone-sized screens (the popup then uses the vertical image). */
+export function useIsPhone() {
+  const query = "(max-width: 760px)"
+  const [phone, setPhone] = useState(() => typeof window !== "undefined" && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const on = () => setPhone(mq.matches)
+    mq.addEventListener("change", on)
+    return () => mq.removeEventListener("change", on)
+  }, [])
+  return phone
+}
+
+/** Which layout really applies: without an image there is only text. */
+export function cardLayout(item: CardItem, hasImage: boolean) {
+  return hasImage ? item.layout || "lateral" : "lateral"
+}
+
+function CtaButtons({ item, onCta, onLater, later = true }: { item: CardItem; onCta?: () => void; onLater?: () => void; later?: boolean }) {
+  if (item.ctaType === "ninguno")
+    return later ? (
+      <button className="button button-primary" onClick={onLater}>
+        Entendido
+      </button>
+    ) : null
+  return (
+    <>
+      {item.ctaType === "enlace" ? (
+        <a className="button button-primary" href={item.ctaUrl || "#"} target="_blank" rel="noreferrer" onClick={onCta}>
+          {item.ctaLabel || "Ver más"} <Icon name="arrow" />
+        </a>
+      ) : (
+        <button className="button button-primary" onClick={onCta}>
+          {item.ctaLabel || "Inscríbete aquí"} <Icon name="arrow" />
+        </button>
+      )}
+      {later && (
+        <button className="announce-later" onClick={onLater}>
+          Ahora no
+        </button>
+      )}
+    </>
+  )
+}
+
+function EventMeta({ item }: { item: CardItem }) {
+  const date = formatEventDate(item.eventDate, item.eventTime)
+  if (!date && !item.location) return null
+  return (
+    <ul className="announce-meta">
+      {date && (
+        <li>
+          <Icon name="clock" />
+          <span>{date}</span>
+        </li>
+      )}
+      {item.location && (
+        <li>
+          <Icon name="pin" />
+          <span>{item.location}</span>
+        </li>
+      )}
+    </ul>
+  )
+}
+
 export function AnnouncementCard({
   item,
   onCta,
   onLater,
   preview = false,
+  phone: forcePhone,
 }: {
-  item: Announcement | (Omit<Announcement, "id" | "createdAt" | "updatedAt"> & { id?: string })
+  item: CardItem
   onCta?: () => void
   onLater?: () => void
   preview?: boolean
+  /** Force the phone version (admin preview); by default it follows the screen. */
+  phone?: boolean
 }) {
-  const image = useFileUrl(item.imageId)
-  const date = formatEventDate(item.eventDate, item.eventTime)
+  const isPhone = useIsPhone()
+  const phone = forcePhone ?? isPhone
+  const image = useFileUrl((phone && item.mobileImageId) || item.imageId)
+  const layout = cardLayout(item, Boolean(item.imageId))
+  const cls = `announce-card announce-${layout} ${phone ? "is-phone" : ""} ${preview ? "announce-preview" : ""}`
+
+  if (layout === "imagen") {
+    return (
+      <div className={cls}>
+        {image ? <img className="announce-only-img" src={image} alt={item.title} /> : <div className="announce-loading" />}
+        {item.ctaType !== "ninguno" && (
+          <div className="announce-only-cta">
+            <CtaButtons item={item} onCta={onCta} onLater={onLater} later={false} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (layout === "horizontal") {
+    return (
+      <div className={`${cls} ${phone && !item.mobileImageId ? "text-below" : ""}`}>
+        {image ? <img className="announce-wide-img" src={image} alt="" /> : <div className="announce-loading" />}
+        <div className="announce-overlay">
+          {item.kicker && <p className="announce-kicker">{item.kicker}</p>}
+          <h2>{item.title || "Título del anuncio"}</h2>
+          <EventMeta item={item} />
+          {item.description && <p className="announce-text">{item.description}</p>}
+          <div className="announce-actions">
+            {item.price && <span className="announce-chip">{item.price}</span>}
+            <CtaButtons item={item} onCta={onCta} onLater={onLater} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={`announce-card ${image ? "" : "announce-no-image"} ${preview ? "announce-preview" : ""}`}>
-      {image && (
+    <div className={`${cls} ${item.imageId ? "" : "announce-no-image"}`}>
+      {item.imageId && (
         <figure className="announce-image">
-          <img src={image} alt="" />
+          {image && <img className="announce-image-blur" src={image} alt="" aria-hidden="true" />}
+          {image && <img className="announce-image-main" src={image} alt="" />}
         </figure>
       )}
       <div className="announce-content">
         <p className="announce-kicker">{item.kicker || "Anuncio"}</p>
         <h2>{item.title || "Título del anuncio"}</h2>
-        {(date || item.location) && (
-          <ul className="announce-meta">
-            {date && (
-              <li>
-                <Icon name="clock" />
-                <span>{date}</span>
-              </li>
-            )}
-            {item.location && (
-              <li>
-                <Icon name="pin" />
-                <span>{item.location}</span>
-              </li>
-            )}
-          </ul>
-        )}
+        <EventMeta item={item} />
         {item.description && <p className="announce-text">{item.description}</p>}
         {item.price && (
           <p className="announce-price">
@@ -107,24 +199,7 @@ export function AnnouncementCard({
           </p>
         )}
         <div className="announce-actions">
-          {item.ctaType === "ninguno" ? (
-            <button className="button button-primary" onClick={onLater}>
-              Entendido
-            </button>
-          ) : item.ctaType === "enlace" ? (
-            <a className="button button-primary" href={item.ctaUrl || "#"} target="_blank" rel="noreferrer" onClick={onCta}>
-              {item.ctaLabel || "Ver más"} <Icon name="arrow" />
-            </a>
-          ) : (
-            <button className="button button-primary" onClick={onCta}>
-              {item.ctaLabel || "Inscríbete aquí"} <Icon name="arrow" />
-            </button>
-          )}
-          {item.ctaType !== "ninguno" && (
-            <button className="announce-later" onClick={onLater}>
-              Ahora no
-            </button>
-          )}
+          <CtaButtons item={item} onCta={onCta} onLater={onLater} />
         </div>
       </div>
     </div>
@@ -302,7 +377,13 @@ export default function AnnouncementPopup() {
 
   return (
     <div className="announce-backdrop" onClick={close}>
-      <div className="announce-dialog" role="dialog" aria-modal="true" aria-label={item.title} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`announce-dialog ${step === "info" ? `announce-dialog-${cardLayout(item, Boolean(item.imageId))}` : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.title}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="announce-close" onClick={close} aria-label="Cerrar">
           <Icon name="close" />
         </button>

@@ -3,6 +3,7 @@
  * event inscriptions), stored in Supabase (`submissions`, supabase/schema.sql).
  * Visitors can only insert; signed-in staff read and manage them.
  */
+import { track } from "./analytics"
 import { notifyChange, onTableChange, supabase } from "./supabase"
 
 export const BACKEND_CONNECTED = true
@@ -77,6 +78,7 @@ export async function saveSubmission<K extends SubmissionKind>(kind: K, data: Da
   const { error } = await supabase.from("submissions").insert({ id: item.id, kind, status: "nueva", data })
   if (error) throw error
   notifyChange("submissions")
+  track("formulario", kind, (data as { name?: string }).name ?? "")
   return item
 }
 

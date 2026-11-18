@@ -117,7 +117,8 @@ function Editor({
       return setError("La fecha 'Mostrar hasta' debe ser posterior a 'Mostrar desde'.")
     setSaving(true)
     try {
-      await saveAnnouncement(draft, editingId)
+      // "Solo la imagen" never shows a button.
+      await saveAnnouncement(draft.layout === "imagen" ? { ...draft, ctaType: "ninguno" } : draft, editingId)
     } catch {
       setSaving(false)
       return setError("No pudimos guardar el anuncio. Revisa tu conexión e inténtalo de nuevo.")
@@ -133,7 +134,7 @@ function Editor({
   const layouts: [AnnouncementLayout, string, string][] = [
     ["lateral", "Flyer al lado del texto", "Para imágenes verticales o cuadradas"],
     ["horizontal", "Texto sobre la imagen", "Imagen horizontal con el texto abajo"],
-    ["imagen", "Solo la imagen", "Sin texto; el botón va sobre la imagen"],
+    ["imagen", "Solo la imagen", "Sin texto ni botones: solo tu imagen"],
   ]
   const tips: Record<AnnouncementLayout, string> = {
     lateral: "Computador: vertical o cuadrada (1080 × 1350 o 1080 × 1080).",
@@ -254,7 +255,7 @@ function Editor({
           </label>
         </fieldset>
 
-        <fieldset>
+        {draft.layout !== "imagen" && <fieldset>
           <legend>Llamado a la acción</legend>
           <div className="ann-segment">
             {ctaOptions.map(([value, label]) => (
@@ -303,7 +304,7 @@ function Editor({
               )}
             </>
           )}
-        </fieldset>
+        </fieldset>}
 
         <fieldset>
           <legend>Publicación</legend>
@@ -429,7 +430,7 @@ export default function AdminAnnouncements({ go }: { go: (page: string) => void 
                   <p>{[formatEventDate(a.eventDate, a.eventTime), a.location].filter(Boolean).join(" · ") || "Sin fecha definida"}</p>
                   <dl>
                     <dt>Botón</dt>
-                    <dd>{a.ctaType === "ninguno" ? "Sin botón" : a.ctaLabel}</dd>
+                    <dd>{a.ctaType === "ninguno" || a.layout === "imagen" ? "Sin botón" : a.ctaLabel}</dd>
                     {a.ctaType === "inscripcion" && (
                       <>
                         <dt>Inscritos</dt>

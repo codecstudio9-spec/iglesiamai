@@ -4,15 +4,17 @@
  */
 import { createContext, FormEvent, useContext, useEffect, useMemo, useState } from "react"
 import { AdminLogo, AIcon, PanelTitle, StatusPill } from "./AdminApp"
-import { blobToDataUrl, preparePhoto } from "./lib/people"
+import { blobToDataUrl, discipleLink, preparePhoto } from "./lib/people"
 import { SettingsContext } from "./lib/settings"
 import {
   acceptInvitation,
   can,
   createInvitation,
   invitationState,
+  LEADER_ROLES,
   listInvitations,
   listStaff,
+  MINISTRIES,
   onInvitationsChange,
   onStaffChange,
   PERMISSIONS,
@@ -510,8 +512,8 @@ export function UsersPage({ invitations = false }: { invitations?: boolean }) {
                     return (
                       <tr key={inv.id}>
                         <td>
-                          <strong>{inv.name || "Sin nombre"}</strong>
-                          <small>{inv.email || inv.phone || "—"}</small>
+                          <strong>{inv.reusable ? "Enlace general de líderes" : inv.name || "Sin nombre"}</strong>
+                          <small>{inv.reusable ? `${inv.uses} ${inv.uses === 1 ? "líder registrado" : "líderes registrados"}` : inv.email || inv.phone || "—"}</small>
                         </td>
                         <td>
                           {inv.roleLabel || "—"}
@@ -611,6 +613,12 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
   const [active, setActive] = useState(false)
   const [photo, setPhoto] = useState<{ blob: Blob; url: string } | null>(null)
   const [photoError, setPhotoError] = useState("")
+  const [roles, setRoles] = useState<string[]>([])
+  const [joinCode, setJoinCode] = useState("")
+
+  function toggleRole(role: string) {
+    setRoles((cur) => (cur.includes(role) ? cur.filter((r) => r !== role) : cur.length >= 2 ? [cur[1], role] : [...cur, role]))
+  }
 
   async function pickPhoto(file?: File) {
     if (!file) return
@@ -639,6 +647,7 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
       return setError("El usuario debe tener de 3 a 30 letras o números, sin espacios ni tildes (puedes usar . - _).")
     if (password.length < 8) return setError("La contraseña debe tener al menos 8 caracteres.")
     if (password !== f.get("confirm")) return setError("Las contraseñas no coinciden.")
+    if (invite?.kind === "lider" && roles.length === 0) return setError("Elige al menos un rol (máximo 2).")
     setSending(true)
     try {
       const result = await acceptInvitation({
@@ -653,8 +662,18 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
         username,
         password,
         ...(photo ? { photo: await blobToDataUrl(photo.blob) } : {}),
+        ...(invite?.kind === "lider"
+          ? {
+              roles,
+              ministry: String(f.get("ministry") || ""),
+              leadsEncuentro: f.get("leadsEncuentro") === "si",
+              leadsConvencion: f.get("leadsConvencion") === "si",
+            }
+          : {}),
+        website: String(f.get("website") || ""),
       })
       setActive(result.active)
+      setJoinCode(result.joinCode ?? "")
       setDone(username)
       window.scrollTo({ top: 0 })
     } catch (err) {
@@ -681,6 +700,7 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
                 : `Tu usuario es “${done}”. Un administrador revisará tus datos y te dará los permisos que necesitas. Cuando estés aprobado podrás entrar con tu usuario y contraseña.`
               : invalid}
           </p>
+          {done && joinCode && <MyDiscipleLink code={joinCode} />}
           {done && active && (
             <button
               onClick={() => {
@@ -731,11 +751,13 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
       </div>
       <section className="onboarding-card">
         <div className="onboarding-heading">
-          <p className="onboarding-kicker">Invitación personal{invite.roleLabel ? ` · ${invite.roleLabel}` : ""}</p>
-          <h1>{firstName ? `Bienvenido, ${firstName}` : "Bienvenido a MAI"}</h1>
+          <p className="onboarding-kicker">
+            {invite.general ? "Registro de líderes" : `Invitación personal${invite.roleLabel ? ` · ${invite.roleLabel}` : ""}`}
+          </p>
+          <h1>{firstName ? `Bienvenido, ${firstName}` : invite.general ? "Bienvenido, líder" : "Bienvenido a MAI"}</h1>
           <span>
             Completa tus datos y crea tu usuario y contraseña para entrar a la gestión interna de Iglesia MAI.
-            {invite.kind === "lider" ? " Tu cuenta de líder queda activa apenas termines." : ""}
+            {invite.kind === "lider" ? " Tu cuenta de líder queda activa apenas termines y recibirás tu propio enlace para inscribir a tus discípulos." : ""}
           </span>
         </div>
         <form className="onboarding-form" onSubmit={submit}>
@@ -786,10 +808,57 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
               <input name="email" required type="email" defaultValue={invite.email} placeholder="tu@correo.com" autoComplete="email" />
             </label>
           </div>
+          {invite.kind === "lider" && (
+            <>
+              <div className="form-section-title">
+                <span>02</span>
+                <p>Tu servicio en MAI</p>
+              </div>
+              <div className="onboarding-fields">
+                <fieldset className="field-full role-picker">
+                  <legend>
+                    ¿Qué roles tienes? <small>Elige 1 o 2</small>
+                  </legend>
+                  <div>
+                    {LEADER_ROLES.map((r) => (
+                      <button type="button" key={r} className={roles.includes(r) ? "active" : ""} aria-pressed={roles.includes(r)} onClick={() => toggleRole(r)}>
+                        {roles.includes(r) && <AIcon name="check" />} {r}
+                      </button>
+                    ))}
+                  </div>
+                  <small>{roles.length === 2 ? "Ya elegiste 2 roles. Toca otro para cambiar el último." : "Por ejemplo: Líder y Maestro, o Líder y Alabanza."}</small>
+                </fieldset>
+                <label>
+                  ¿Eres encargado del Encuentro?
+                  <select name="leadsEncuentro" defaultValue="no">
+                    <option value="no">No</option>
+                    <option value="si">Sí, soy encargado del Encuentro</option>
+                  </select>
+                </label>
+                <label>
+                  ¿Eres encargado de la Convención?
+                  <select name="leadsConvencion" defaultValue="no">
+                    <option value="no">No</option>
+                    <option value="si">Sí, soy encargado de la Convención</option>
+                  </select>
+                </label>
+                <label className="field-full">
+                  ¿De qué ministerio eres encargado?
+                  <select name="ministry" defaultValue="">
+                    <option value="">Ninguno</option>
+                    {MINISTRIES.map((m) => (
+                      <option key={m}>{m}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </>
+          )}
           <div className="form-section-title">
-            <span>02</span>
+            <span>{invite.kind === "lider" ? "03" : "02"}</span>
             <p>Crea tu acceso</p>
           </div>
+          <input className="hp-field" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
           <div className="onboarding-fields">
             <label className="field-full">
               Usuario
@@ -832,5 +901,34 @@ export function InviteRegistration({ token, onExit }: { token: string; onExit: (
       </section>
       <footer className="onboarding-footer">Iglesia MAI · Bogotá, Colombia</footer>
     </main>
+  )
+}
+
+/** After a leader registers: their own link to send to their disciples. */
+function MyDiscipleLink({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false)
+  const link = discipleLink(code)
+  const message = `Hola, te invito a empezar tu proceso en Iglesia MAI. Completa tus datos aquí:\n\n${link}`
+  return (
+    <div className="my-disciple-link">
+      <strong>Tu enlace para tus discípulos</strong>
+      <p>Envíalo a las personas que acompañas: se inscriben solas y te llegan a tu panel. También lo encuentras en “Mis discípulos”.</p>
+      <div className="link-box">
+        <span>{link}</span>
+        <button
+          onClick={() =>
+            navigator.clipboard?.writeText(link).then(() => {
+              setCopied(true)
+              window.setTimeout(() => setCopied(false), 2000)
+            })
+          }
+        >
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+      <a className="my-disciple-wa" href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer">
+        Enviar por WhatsApp
+      </a>
+    </div>
   )
 }

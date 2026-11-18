@@ -6,6 +6,7 @@ import { currentStaff, RECOVERY_FLAG, sendPasswordReset, setNewPassword, signIn,
 import { InviteRegistration, MyAccess, UsersPage } from "./AdminUsers"
 import { Dashboard, DiscipleSignup, NotificationsPage, PeoplePage, PersonProfile, ProgramPage, TeamPage, useAlerts } from "./AdminPeople"
 import SettingsPage from "./AdminSettings"
+import AnalyticsPage from "./AdminAnalytics"
 import { AuditPage, CertificatesPage, DocumentsPage, ExpensesPage, PaymentsPage, ReportsPage } from "./AdminRecords"
 import { SettingsContext, useSettings } from "./lib/settings"
 import { can, myAccess, type Permission, type StaffMember } from "./lib/staff"
@@ -192,6 +193,7 @@ const StaffName = createContext("Equipo MAI")
 
 const nav = [
   { label: "Dashboard", icon: "home" as AdminIcon },
+  { label: "Analítica", icon: "eye" as AdminIcon },
   { label: "Personas", icon: "people" as AdminIcon },
   {
     label: "Sitio web",
@@ -235,7 +237,7 @@ const pagePermission: Record<string, Permission> = {
   Certificados: "documentos",
   Reportes: "reportes",
 }
-const ownerOnlyPages = ["Auditoría", "Configuración"]
+const ownerOnlyPages = ["Auditoría", "Configuración", "Analítica"]
 
 export function canOpen(me: StaffMember | null, page: string) {
   if (!me) return false
@@ -805,6 +807,7 @@ function AdminShell({
   if (!canOpen(me, page)) content = <Dashboard go={go} name={name} />
   else if (personId) content = <PersonProfile id={personId} back={() => setPersonId(null)} />
   else if (page === "Dashboard") content = <Dashboard go={go} name={name} />
+  else if (page === "Analítica") content = <AnalyticsPage />
   else if (page === "Personas") content = <PeoplePage openPerson={open} initialQuery={query} />
   else if (page === "Sitio web") content = <WebOverview go={go} />
   else if (page === "Anuncios") content = <AdminAnnouncements go={go} />

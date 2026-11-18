@@ -3,6 +3,7 @@ import { FormEvent, lazy, Suspense, useCallback, useEffect, useState } from "rea
 import Icon, { type IconName } from "./components/Icon"
 import FloatingActions, { openWidget, PreviewNote, SendError, UsherForm, useSend } from "./components/PublicWidgets"
 import { saveSubmission } from "./lib/submissions"
+import { startTracking } from "./lib/analytics"
 import AnnouncementPopup, { openAnnouncement, useActiveAnnouncements, useFileUrl } from "./components/AnnouncementPopup"
 import { formatEventDate, type Announcement } from "./lib/announcements"
 
@@ -279,48 +280,48 @@ function Navbar({ route }: { route: Route }) {
  */
 const heroSlides = [
   {
-    src: "/mai-hero-pastores.jpg", position: "78% center", seconds: 10, shrink: true, alt: "Los pastores de Iglesia MAI sentados juntos en una banca",
+    src: "/pastores.jpg", position: "78% center", seconds: 12, shrink: true, alt: "Los pastores de Iglesia MAI sentados juntos en una banca",
     kicker: "Un mensaje de nuestros pastores",
     title: "Bienvenido a MAI,", accent: "aquí tienes familia.",
     copy: "Dios nos llamó a abrir esta casa para ti. Ven como estás: juntos vamos a conocer Su amor y a caminar el propósito que Él tiene para tu vida.",
   },
   {
-    src: "/mai-hero-adoracion.jpg", position: "74% center", alt: "Predicador de Iglesia MAI adorando con la mano en alto",
-    kicker: "Iglesia MAI · Bogotá",
-    title: "Extendiendo el reino de Dios,", accent: "un corazón a la vez.",
-    copy: "Un lugar para conocer a Dios, crecer en comunidad y vivir el propósito que Él tiene para ti.",
+    src: "/2.jpg", position: "64% center", alt: "Pastora de Iglesia MAI leyendo la Palabra",
+    kicker: "El llamado",
+    title: "Dios tiene un propósito", accent: "para tu vida.",
+    copy: "Cada domingo abrimos la Biblia para crecer juntos y descubrir el llamado que Él tiene para ti.",
   },
   {
-    src: "/mai-servicio-equipo.jpg", position: "center 30%", wide: true, alt: "Equipo del Ministerio de Servicio de Iglesia MAI en el escenario",
-    kicker: "Ministerio de Servicio",
-    title: "Servimos con alegría,", accent: "te recibimos con amor.",
-    copy: "Cada domingo nuestro equipo te espera en la puerta con una sonrisa y un abrazo, para acompañarte a tu lugar.",
-  },
-  {
-    src: "/mai-hero-estad-quietos.jpg", position: "72% center", alt: "Pastor de Iglesia MAI predicando «Estad quietos»",
-    kicker: "Estad quietos",
-    title: "Detente un momento:", accent: "Dios está aquí.",
-    copy: "Un lugar para descansar en Su presencia, escuchar Su voz y encontrar paz para el camino.",
-  },
-  {
-    src: "/mai-hero-paz-dios.jpg", position: "72% center", alt: "Predicadora de Iglesia MAI hablando de la paz de Dios",
+    src: "/3.jpg", position: "72% center", alt: "Predicadora de Iglesia MAI hablando de la paz de Dios",
     kicker: "Paz de Dios",
     title: "Paz para tu corazón,", accent: "paz para tu casa.",
     copy: "Una familia que ora contigo y una Palabra que te sostiene cada semana.",
   },
   {
-    src: "/mai-hero-pastora.jpg", position: "64% center", alt: "Pastora de Iglesia MAI leyendo la Palabra",
-    kicker: "El llamado",
-    title: "Dios tiene un propósito", accent: "para tu vida.",
-    copy: "Cada domingo abrimos la Biblia para crecer juntos y descubrir el llamado que Él tiene para ti.",
+    src: "/4.jpg", position: "74% center", alt: "Predicador de Iglesia MAI adorando con la mano en alto",
+    kicker: "Iglesia MAI · Bogotá",
+    title: "Extendiendo el reino de Dios,", accent: "un corazón a la vez.",
+    copy: "Un lugar para conocer a Dios, crecer en comunidad y vivir el propósito que Él tiene para ti.",
+  },
+  {
+    src: "/5.jpg", position: "72% center", alt: "Pastor de Iglesia MAI predicando «Estad quietos»",
+    kicker: "Estad quietos",
+    title: "Detente un momento:", accent: "Dios está aquí.",
+    copy: "Un lugar para descansar en Su presencia, escuchar Su voz y encontrar paz para el camino.",
+  },
+  {
+    src: "/6.jpg", position: "center 30%", wide: true, alt: "Equipo del Ministerio de Servicio de Iglesia MAI en el escenario",
+    kicker: "Ministerio de Servicio",
+    title: "Servimos con alegría,", accent: "te recibimos con amor.",
+    copy: "Cada domingo nuestro equipo te espera en la puerta con una sonrisa y un abrazo, para acompañarte a tu lugar.",
   },
 ]
 
-/** Which slide is showing: photo and words change together (the pastors' welcome stays 10 s, the rest 5 s). */
+/** Which slide is showing: photo and words change together (the pastors' welcome stays 12 s, the rest 6 s). */
 function useHeroSlide() {
   const [active, setActive] = useState(0)
   useEffect(() => {
-    const seconds = heroSlides[active].seconds ?? 5
+    const seconds = heroSlides[active].seconds ?? 6
     const id = window.setTimeout(function next() {
       // A hidden tab keeps the slide until the person comes back.
       if (document.hidden) return document.addEventListener("visibilitychange", next, { once: true })
@@ -331,7 +332,7 @@ function useHeroSlide() {
   return active
 }
 
-/** Home hero: the photos cross-fade (10 s the pastors, 5 s the rest) with a slow zoom. */
+/** Home hero: the photos cross-fade (12 s the pastors, 6 s the rest) with a slow zoom. */
 function HeroSlides({ active }: { active: number }) {
   return (
     <div className="hero-slides">
@@ -1251,7 +1252,7 @@ function MinistriesPage() {
       title: "Servicio",
       tag: "Ujieres",
       text: "Los ujieres son el primer abrazo de MAI: reciben a cada persona en la puerta, la acompañan a su lugar y cuidan que cada servicio fluya en orden y con amor.",
-      image: "/mai-servicio-equipo.jpg",
+      image: "/6.jpg",
       usher: true,
     },
     {
@@ -1334,7 +1335,7 @@ function MinistriesPage() {
             a las personas, ayudar y que todo funcione con excelencia, este equipo es para ti.
           </p>
           <figure className="usher-photo">
-            <img src="/mai-servicio-equipo.jpg" alt="Equipo de ujieres del Ministerio de Servicio de Iglesia MAI" loading="lazy" />
+            <img src="/6.jpg" alt="Equipo de ujieres del Ministerio de Servicio de Iglesia MAI" loading="lazy" />
           </figure>
           <ul className="usher-list">
             <li>Recibir con una sonrisa a cada persona que llega</li>
@@ -1733,14 +1734,6 @@ function ContactPage() {
               </span>
             </button>
           </div>
-          <div className="help-now" role="note">
-            <strong>¿Necesitas hablar con alguien ahora mismo?</strong>
-            <span>
-              Si estás pasando por un momento muy difícil, no lo enfrentes solo. En Bogotá llama a la{" "}
-              <a href="tel:106">Línea 106</a> (apoyo emocional, gratuita, 24 horas). En una emergencia, al{" "}
-              <a href="tel:123">123</a>.
-            </span>
-          </div>
         </div>
         <div className="reveal">
           <PrayerForm />
@@ -1759,6 +1752,8 @@ function ContactPage() {
 function PublicSite() {
   const [route, setRoute] = useState<Route>(readRoute())
   const [section, setSection] = useState(readSection())
+
+  useEffect(() => startTracking(), [])
 
   useEffect(() => {
     const onHashChange = () => {

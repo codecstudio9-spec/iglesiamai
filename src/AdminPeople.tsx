@@ -749,7 +749,8 @@ function LeaderInviteModal({ close }: { close: () => void }) {
   const me = useContext(MyAccess)
   const settings = useContext(SettingsContext)
   const preset = settings.roles.find((r) => r.id === "lider") ?? settings.roles.find((r) => isLeaderRole(r.name))
-  const [days, setDays] = useState(settings.general.leaderInviteDays || 7)
+  const [general, setGeneral] = useState(true)
+  const [days, setDays] = useState(30)
   const [name, setName] = useState("")
   const [link, setLink] = useState("")
   const [error, setError] = useState("")
@@ -762,7 +763,7 @@ function LeaderInviteModal({ close }: { close: () => void }) {
     try {
       setLink(
         await createInvitation({
-          name,
+          name: general ? "" : name,
           email: "",
           phone: "",
           roleLabel: "Líder",
@@ -770,6 +771,7 @@ function LeaderInviteModal({ close }: { close: () => void }) {
           createdByName: me?.name || "Administrador",
           kind: "lider",
           autoPermissions: preset?.permissions ?? ["equipo"],
+          reusable: general,
         }),
       )
     } catch (err) {
@@ -790,7 +792,9 @@ function LeaderInviteModal({ close }: { close: () => void }) {
   }
 
   const first = name.trim().split(/\s+/)[0]
-  const message = `Hola${first ? ` ${first}` : ""}, te invito a ser parte del equipo de líderes de Iglesia MAI. Abre este enlace, completa tus datos y crea tu usuario y contraseña para entrar a la plataforma:\n\n${link}`
+  const message = general
+    ? `Líderes de Iglesia MAI: este es el enlace para registrarse en la plataforma. Cada uno llena sus datos, elige sus roles y crea su usuario y contraseña. Al terminar recibe su propio enlace para inscribir a sus discípulos:\n\n${link}`
+    : `Hola${first ? ` ${first}` : ""}, te invito a ser parte del equipo de líderes de Iglesia MAI. Abre este enlace, completa tus datos y crea tu usuario y contraseña para entrar a la plataforma:\n\n${link}`
 
   return (
     <div className="modal-layer">
@@ -807,14 +811,33 @@ function LeaderInviteModal({ close }: { close: () => void }) {
         </header>
         {!link ? (
           <>
+            <div className="ann-segment invite-kind">
+              <button type="button" className={general ? "active" : ""} onClick={() => (setGeneral(true), setDays(30))}>
+                Enlace general (para un grupo)
+              </button>
+              <button type="button" className={!general ? "active" : ""} onClick={() => (setGeneral(false), setDays(settings.general.leaderInviteDays || 7))}>
+                Enlace para una persona
+              </button>
+            </div>
             <p className="modal-intro">
-              Genera un enlace y compártelo. El líder llena sus datos, sube su foto y crea su usuario y contraseña. Su cuenta queda{" "}
-              <strong>activa de inmediato</strong> con los permisos de líder; no tienes que aprobar nada.
+              {general ? (
+                <>
+                  Un solo enlace para enviar al grupo de líderes. <strong>Cada líder que lo abra crea su propia cuenta</strong>: llena sus datos, elige hasta 2 roles, dice si es
+                  encargado del Encuentro, de la Convención o de un ministerio, y recibe su enlace personal para inscribir a sus discípulos.
+                </>
+              ) : (
+                <>
+                  Genera un enlace y compártelo. El líder llena sus datos, sube su foto y crea su usuario y contraseña. Su cuenta queda{" "}
+                  <strong>activa de inmediato</strong> con los permisos de líder; no tienes que aprobar nada.
+                </>
+              )}
             </p>
             <div className="invite-fields">
-              <label className="field-full">
-                ¿Para quién es? <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Opcional: solo para saludarlo en el mensaje" />
-              </label>
+              {!general && (
+                <label className="field-full">
+                  ¿Para quién es? <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Opcional: solo para saludarlo en el mensaje" />
+                </label>
+              )}
               <label className="field-full">
                 El enlace vence en
                 <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
@@ -822,6 +845,7 @@ function LeaderInviteModal({ close }: { close: () => void }) {
                   <option value={7}>7 días</option>
                   <option value={15}>15 días</option>
                   <option value={30}>30 días</option>
+                  <option value={90}>3 meses</option>
                 </select>
               </label>
             </div>
@@ -829,7 +853,7 @@ function LeaderInviteModal({ close }: { close: () => void }) {
               <AIcon name="shield" />
               <p>
                 Entrará con los permisos del rol Líder ({(preset?.permissions ?? ["equipo"]).length} módulos). Puedes cambiarlos en Configuración → Roles o
-                después en Usuarios. Cada enlace sirve para una sola cuenta.
+                después en Usuarios. {general ? "Puedes anular el enlace general cuando quieras en Mi equipo → Invitaciones." : "Cada enlace sirve para una sola cuenta."}
               </p>
             </div>
             {error && <p className="users-error">{error}</p>}
@@ -842,8 +866,10 @@ function LeaderInviteModal({ close }: { close: () => void }) {
             <span className="generated-check">
               <AIcon name="check" />
             </span>
-            <h3>Enlace listo{first ? ` para ${first}` : ""}</h3>
-            <p>Cópialo o envíalo ahora: por seguridad no se vuelve a mostrar. Si se pierde, genera uno nuevo.</p>
+            <h3>{general ? "Enlace general listo" : `Enlace listo${first ? ` para ${first}` : ""}`}</h3>
+            <p>
+              Cópialo o envíalo ahora{general ? " al grupo de líderes" : ""}: por seguridad no se vuelve a mostrar. Si se pierde, genera uno nuevo.
+            </p>
             <div className="link-box">
               <span>{link}</span>
               <button onClick={copy}>{copied ? "Copiado" : "Copiar"}</button>
@@ -945,6 +971,14 @@ function LeaderCard({ leader, url, canEditPhoto }: { leader: TeamMember; url?: s
         <StatusPill tone="pill-ok">{leader.roleLabel || "Equipo"}</StatusPill>
         <h3>{leader.name}</h3>
         <p>{leader.phone || leader.email || "Sin contacto"}</p>
+        {(leader.ministry || leader.leadsEncuentro || leader.leadsConvencion) && (
+          <p className="leader-duties">
+            Encargado de{" "}
+            {[leader.leadsEncuentro && "el Encuentro", leader.leadsConvencion && "la Convención", leader.ministry && `el ministerio ${leader.ministry}`]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+        )}
       </div>
       <dl>
         <div>

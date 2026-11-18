@@ -5,6 +5,8 @@
 //       → creates their login (username@iglesiamai.com) and a staff row. A "persona"
 //         invitation leaves it PENDING with no permissions until someone approves it;
 //         a "lider" invitation activates it at once with the permissions chosen on the link.
+//       A "general" (reusable) leader link is shared with a group: every use creates
+//       its own active leader account, with up to 2 roles and what they are in charge of.
 //   { action: "unirse-ver", code }  → the leader behind a personal disciple link
 //   { action: "unirse", code, name, ..., photo? } → a new disciple for that leader
 //       (pending until the leader accepts, unless Configuración says otherwise).
@@ -15,6 +17,9 @@ import { createClient } from "@supabase/supabase-js"
 const STAFF_EMAIL_DOMAIN = "iglesiamai.com"
 const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/
 const DOC_TYPES = ["CC", "CE", "TI", "PA", "RC"]
+/** Keep in sync with LEADER_ROLES / MINISTRIES in src/lib/staff.ts. */
+const LEADER_ROLES = ["Líder", "Maestro", "Alabanza", "Intercesión", "Servicio", "MAI Kids", "Pastor"]
+const MINISTRIES = ["Alabanza y Adoración", "Servicio", "Intercesión", "MAI Kids", "Hogares de Avivamiento", "Jóvenes", "Medios y comunicaciones"]
 const VALID_PERMISSIONS = ["solicitudes", "anuncios", "personas", "equipo", "encuentros", "universidad", "capacitacion", "pagos", "gastos", "documentos", "reportes"]
 
 type Body = Record<string, unknown>
@@ -47,25 +52,27 @@ type InvitationRow = {
   expires_at: string
   used_at: string | null
   revoked_at: string | null
+  reusable: boolean | null
+  uses: number | null
 }
 
 async function findInvitation(db: ReturnType<typeof admin>, token: string) {
   if (token.length < 20 || token.length > 100) throw new HttpError(404, "Esta invitación no es válida.")
   const { data, error } = await db
     .from("invitations")
-    .select("id,name,email,phone,role_label,kind,auto_permissions,created_by,expires_at,used_at,revoked_at")
+    .select("id,name,email,phone,role_label,kind,auto_permissions,created_by,expires_at,used_at,revoked_at,reusable,uses")
     .eq("token_hash", hash(token))
     .maybeSingle<InvitationRow>()
   if (error) throw error
   if (!data || data.revoked_at) throw new HttpError(404, "Esta invitación no es válida o fue anulada.")
-  if (data.used_at) throw new HttpError(410, "Esta invitación ya se usó. Si ya creaste tu cuenta, inicia sesión.")
+  if (data.used_at && !data.reusable) throw new HttpError(410, "Esta invitación ya se usó. Si ya creaste tu cuenta, inicia sesión.")
   if (new Date(data.expires_at).getTime() < Date.now()) throw new HttpError(410, "Esta invitación venció. Pide un enlace nuevo.")
   return data
 }
 
 async function preview(body: Body) {
   const inv = await findInvitation(admin(), text(body.token))
-  return { name: inv.name, email: inv.email, phone: inv.phone, roleLabel: inv.role_label, kind: inv.kind }
+  return { name: inv.reusable ? "" : inv.name, email: inv.reusable ? "" : inv.email, phone: inv.reusable ? "" : inv.phone, roleLabel: inv.role_label, kind: inv.kind, general: Boolean(inv.reusable) }
 }
 
 /** Stores a photo sent as a data URL in the private "fotos" bucket; returns its path or null. */
@@ -107,21 +114,40 @@ async function register(body: Body) {
     throw new HttpError(400, "El usuario debe tener de 3 a 30 letras o números, sin espacios ni tildes (puedes usar . - _).")
   if (password.length < 8 || password.length > 72) throw new HttpError(400, "La contraseña debe tener al menos 8 caracteres.")
 
+  if (text(body.website)) throw new HttpError(400, "No pudimos crear tu cuenta.") // honeypot: bots fill every field
+
   const inv = await findInvitation(db, token)
+  const isLeader = inv.kind === "lider"
+
+  // What a leader told us: up to 2 roles and what they are in charge of.
+  const roles = isLeader && Array.isArray(body.roles) ? [...new Set(body.roles.map((r) => text(r, 40)).filter((r) => LEADER_ROLES.includes(r)))] : []
+  if (isLeader && roles.length === 0) throw new HttpError(400, "Elige al menos un rol.")
+  if (roles.length > 2) throw new HttpError(400, "Puedes elegir máximo 2 roles.")
+  const ministry = isLeader ? text(body.ministry, 60) : ""
+  if (ministry && !MINISTRIES.includes(ministry)) throw new HttpError(400, "Revisa el ministerio que tienes a cargo.")
+  // The leader role goes first so the person shows up under "Líderes".
+  roles.sort((a, b) => (a === "Líder" ? -1 : b === "Líder" ? 1 : 0))
+  const roleLabel = roles.length ? (roles[0] === "Líder" ? roles.join(" · ") : `Líder · ${roles.join(" · ")}`) : inv.role_label
 
   const { data: taken } = await db.from("staff").select("user_id").eq("username", username).maybeSingle()
   if (taken) throw new HttpError(409, "Ese usuario ya existe. Elige otro.")
 
-  // Claim the invitation first so the same link can never create two accounts.
-  const { data: claimed, error: claimError } = await db
-    .from("invitations")
-    .update({ used_at: new Date().toISOString() })
-    .eq("id", inv.id)
-    .is("used_at", null)
-    .select("id")
-  if (claimError) throw claimError
-  if (!claimed?.length) throw new HttpError(410, "Esta invitación ya se usó.")
-  const release = () => db.from("invitations").update({ used_at: null }).eq("id", inv.id)
+  // Claim a personal invitation first so the same link can never create two accounts.
+  // A general link stays open (until it expires or is revoked).
+  let release = async () => {}
+  if (!inv.reusable) {
+    const { data: claimed, error: claimError } = await db
+      .from("invitations")
+      .update({ used_at: new Date().toISOString() })
+      .eq("id", inv.id)
+      .is("used_at", null)
+      .select("id")
+    if (claimError) throw claimError
+    if (!claimed?.length) throw new HttpError(410, "Esta invitación ya se usó.")
+    release = async () => {
+      await db.from("invitations").update({ used_at: null }).eq("id", inv.id)
+    }
+  }
 
   const { data: created, error: userError } = await db.auth.admin.createUser({
     email: `${username}@${STAFF_EMAIL_DOMAIN}`,
@@ -138,7 +164,6 @@ async function register(body: Body) {
   }
 
   const userId = created.user.id
-  const isLeader = inv.kind === "lider"
   const photoPath = await storePhoto(db, body.photo, "equipo").catch(() => null)
   const { error: staffError } = await db.from("staff").insert({
     user_id: userId,
@@ -150,7 +175,11 @@ async function register(body: Body) {
     doc_number: docNumber,
     birth_date: birthDate,
     address,
-    role_label: inv.role_label,
+    role_label: roleLabel,
+    roles,
+    ministry,
+    leads_encuentro: isLeader && body.leadsEncuentro === true,
+    leads_convencion: isLeader && body.leadsConvencion === true,
     status: isLeader ? "activo" : "pendiente",
     permissions: isLeader ? (inv.auto_permissions ?? []).filter((p) => VALID_PERMISSIONS.includes(p)) : [],
     approved_by: isLeader ? inv.created_by : null,
@@ -167,8 +196,11 @@ async function register(body: Body) {
     throw staffError
   }
 
-  await db.from("invitations").update({ used_by: userId }).eq("id", inv.id)
-  return { ok: true, username, active: isLeader }
+  if (inv.reusable) await db.from("invitations").update({ uses: (inv.uses ?? 0) + 1 }).eq("id", inv.id)
+  else await db.from("invitations").update({ used_by: userId }).eq("id", inv.id)
+  // The new leader's own link for their disciples.
+  const { data: me } = await db.from("staff").select("join_code").eq("user_id", userId).maybeSingle()
+  return { ok: true, username, active: isLeader, joinCode: isLeader ? (me?.join_code ?? "") : "" }
 }
 
 /* A leader's personal link: new disciples sign themselves up */

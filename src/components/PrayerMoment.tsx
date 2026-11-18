@@ -6,6 +6,7 @@ import namesData from "../nombres.json"
 import { matchNeed, needs } from "../lib/prayerMatch"
 import { composeRelease, composeTemaAnswer, rememberVerse, temaById, temaFrase } from "../lib/prayerCompose"
 import type { Tema } from "../temas"
+import { track } from "../lib/analytics"
 
 type Step = {
   type: "breath" | "plain" | "write" | "word"
@@ -339,6 +340,9 @@ export default function PrayerMoment({
     nextRef.current?.focus({ preventScroll: true })
   }, [phase, step])
 
+  // Analytics (owner only): someone opened Ora aquí with Luján.
+  useEffect(() => track("oracion_abrir", startWith ?? ""), [startWith])
+
   function toggleSound() {
     const next = !sound || blocked
     setSound(next)
@@ -352,6 +356,7 @@ export default function PrayerMoment({
 
   function welcomeDone() {
     setGreetName(firstName)
+    if (name.trim()) track("oracion_nombre", "", name.trim())
     const direct = prayers.find((p) => p.id === startWith)
     if (direct) {
       setPrayer(direct)
@@ -381,6 +386,7 @@ export default function PrayerMoment({
       setAnswerVoice(["lee-esto"]) // "Primero... quiero que leas esto. Es solo para ti."
       setPersonal(null)
       rememberVerse(a.verse.ref)
+      track("oracion_escribio", tema.label ?? a.need)
     }
     const controller = new AbortController()
     const timer = window.setTimeout(() => controller.abort(), 15000)
@@ -419,11 +425,13 @@ export default function PrayerMoment({
   /** Straight into the prayer about their request (no intro: they already told us why). */
   function prayForIt() {
     if (!topicPrayer) return choose(today)
+    track("oracion_tema", topicPrayer.title)
     setPrayer(topicPrayer)
     start()
   }
 
   function choose(p: Prayer) {
+    track("oracion_tema", p.title)
     setPrayer(p)
     setGreeted(true)
     setPhase("intro")
@@ -439,7 +447,10 @@ export default function PrayerMoment({
     clearRelease()
     setBurden("")
     setReleased(false)
-    if (i >= prayer.steps.length) setPhase("end")
+    if (i >= prayer.steps.length) {
+      track("oracion_completa", prayer.title)
+      setPhase("end")
+    }
     else setStep(i)
   }
 

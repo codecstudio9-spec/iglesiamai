@@ -1292,10 +1292,6 @@ main:focus { outline: none; }
 .moment-home-seek svg { width: 15px; color: var(--warm); transition: transform .3s ease; }
 .moment-home-seek:hover svg { transform: translateX(4px); }
 /* Contact: immediate help, visible without opening anything */
-.help-now { display: grid; gap: 6px; margin-top: 30px; padding: 20px 22px; border-left: 3px solid var(--warm); border-radius: 0 16px 16px 0; background: rgba(201,99,26,.07); }
-.help-now strong { font-size: 16px; }
-.help-now span { color: var(--muted); font-size: 15px; line-height: 1.6; }
-.help-now a { color: var(--warm); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 
 @media (min-width: 801px) {
 }
@@ -1411,7 +1407,7 @@ main:focus { outline: none; }
 @media (max-width: 800px) {
   .hero--group .hero-overlay { background: linear-gradient(0deg, rgba(6,13,23,.96) 0%, rgba(6,13,23,.9) 48%, rgba(6,13,23,.7) 64%, rgba(6,13,23,.3) 80%, rgba(6,13,23,.1) 100%); }
 }
-.ministry-row img[src="/mai-servicio-equipo.jpg"] { object-position: 45% center; }
+.ministry-row img[src="/6.jpg"] { object-position: 45% center; }
 .usher-photo { margin: 34px 0 0; overflow: hidden; border-radius: 4px; }
 .usher-photo img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 

@@ -173,23 +173,44 @@ export type TeamMember = {
   photoPath: string | null
   createdAt: string
   disciples: number
+  roles: string[]
+  ministry: string
+  leadsEncuentro: boolean
+  leadsConvencion: boolean
+}
+
+type TeamRow = {
+  user_id: string
+  name: string
+  role_label: string
+  phone: string
+  email: string
+  photo_path: string | null
+  created_at: string
+  disciples: number
+  roles?: string[] | null
+  ministry?: string | null
+  leads_encuentro?: boolean | null
+  leads_convencion?: boolean | null
 }
 
 export async function listTeam(): Promise<TeamMember[]> {
   const { data, error } = await supabase.rpc("list_team")
   if (error) throw error
-  return (data as { user_id: string; name: string; role_label: string; phone: string; email: string; photo_path: string | null; created_at: string; disciples: number }[]).map(
-    (r) => ({
-      userId: r.user_id,
-      name: r.name,
-      roleLabel: r.role_label,
-      phone: r.phone,
-      email: r.email,
-      photoPath: r.photo_path,
-      createdAt: r.created_at,
-      disciples: Number(r.disciples) || 0,
-    }),
-  )
+  return (data as TeamRow[]).map((r) => ({
+    userId: r.user_id,
+    name: r.name,
+    roleLabel: r.role_label,
+    phone: r.phone,
+    email: r.email,
+    photoPath: r.photo_path,
+    createdAt: r.created_at,
+    disciples: Number(r.disciples) || 0,
+    roles: r.roles ?? [],
+    ministry: r.ministry ?? "",
+    leadsEncuentro: Boolean(r.leads_encuentro),
+    leadsConvencion: Boolean(r.leads_convencion),
+  }))
 }
 
 export const isLeaderRole = (role: string) => /^l[ií]der/i.test(role.trim())

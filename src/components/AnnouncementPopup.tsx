@@ -9,6 +9,7 @@ import {
 } from "../lib/announcements"
 import { compressImage, getFileUrl, MAX_UPLOAD_BYTES, putFile } from "../lib/files"
 import { saveSubmission } from "../lib/submissions"
+import { track } from "../lib/analytics"
 
 const SEEN_KEY = "mai.anuncios.vistos"
 
@@ -147,12 +148,8 @@ export function AnnouncementCard({
   if (layout === "imagen") {
     return (
       <div className={cls}>
+        {/* "Solo la imagen" means exactly that: no buttons over it. */}
         {image ? <img className="announce-only-img" src={image} alt={item.title} /> : <div className="announce-loading" />}
-        {item.ctaType !== "ninguno" && (
-          <div className="announce-only-cta">
-            <CtaButtons item={item} onCta={onCta} onLater={onLater} later={false} />
-          </div>
-        )}
       </div>
     )
   }
@@ -328,6 +325,7 @@ export default function AnnouncementPopup() {
     const fresh = items.filter((a) => seen[a.id] !== a.updatedAt)
     if (!fresh.length) return
     const t = window.setTimeout(() => {
+      track("anuncio", fresh[0].title)
       setIndex(items.indexOf(fresh[0]))
       setStep("info")
       setOpen(true)

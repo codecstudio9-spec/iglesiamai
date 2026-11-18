@@ -21,6 +21,11 @@ export const PERMISSIONS = [
   { id: "usuarios", label: "Usuarios y permisos", hint: "Invitar personas y asignar permisos" },
 ] as const
 
+/** Roles a leader can pick on the registration link (max 2). Keep in sync with api/registro.ts. */
+export const LEADER_ROLES = ["Líder", "Maestro", "Alabanza", "Intercesión", "Servicio", "MAI Kids", "Pastor"] as const
+/** Ministries a leader can be in charge of ("" = ninguno). Keep in sync with api/registro.ts. */
+export const MINISTRIES = ["Alabanza y Adoración", "Servicio", "Intercesión", "MAI Kids", "Hogares de Avivamiento", "Jóvenes", "Medios y comunicaciones"] as const
+
 export type Permission = (typeof PERMISSIONS)[number]["id"]
 export type StaffStatus = "pendiente" | "activo" | "suspendido" | "rechazado"
 
@@ -42,6 +47,10 @@ export type StaffMember = {
   approvedAt: string | null
   photoPath: string | null
   joinCode: string
+  roles: string[]
+  ministry: string
+  leadsEncuentro: boolean
+  leadsConvencion: boolean
 }
 
 export type InvitationKind = "persona" | "lider"
@@ -58,6 +67,9 @@ export type Invitation = {
   createdAt: string
   usedAt: string | null
   revokedAt: string | null
+  /** A general link: many leaders can register with it. */
+  reusable: boolean
+  uses: number
 }
 
 type StaffRow = {
@@ -78,6 +90,10 @@ type StaffRow = {
   approved_at: string | null
   photo_path: string | null
   join_code: string | null
+  roles: string[] | null
+  ministry: string | null
+  leads_encuentro: boolean | null
+  leads_convencion: boolean | null
 }
 
 type InvitationRow = {
@@ -92,6 +108,8 @@ type InvitationRow = {
   created_at: string
   used_at: string | null
   revoked_at: string | null
+  reusable: boolean | null
+  uses: number | null
 }
 
 function toMember(r: StaffRow): StaffMember {
@@ -113,6 +131,10 @@ function toMember(r: StaffRow): StaffMember {
     approvedAt: r.approved_at,
     photoPath: r.photo_path ?? null,
     joinCode: r.join_code ?? "",
+    roles: r.roles ?? [],
+    ministry: r.ministry ?? "",
+    leadsEncuentro: Boolean(r.leads_encuentro),
+    leadsConvencion: Boolean(r.leads_convencion),
   }
 }
 
@@ -148,7 +170,7 @@ export async function setStaffAccess(userId: string, status: StaffStatus, permis
 export async function listInvitations(): Promise<Invitation[]> {
   const { data, error } = await supabase
     .from("invitations")
-    .select("id,name,email,phone,role_label,kind,expires_at,created_by_name,created_at,used_at,revoked_at")
+    .select("id,name,email,phone,role_label,kind,expires_at,created_by_name,created_at,used_at,revoked_at,reusable,uses")
     .order("created_at", { ascending: false })
   if (error) throw error
   return (data as InvitationRow[]).map((r) => ({
@@ -163,11 +185,13 @@ export async function listInvitations(): Promise<Invitation[]> {
     createdAt: r.created_at,
     usedAt: r.used_at,
     revokedAt: r.revoked_at,
+    reusable: Boolean(r.reusable),
+    uses: r.uses ?? 0,
   }))
 }
 
 export function invitationState(inv: Invitation): "usada" | "revocada" | "expirada" | "vigente" {
-  if (inv.usedAt) return "usada"
+  if (inv.usedAt && !inv.reusable) return "usada"
   if (inv.revokedAt) return "revocada"
   if (new Date(inv.expiresAt).getTime() < Date.now()) return "expirada"
   return "vigente"
@@ -198,6 +222,8 @@ export async function createInvitation(input: {
   /** "lider": the account is active as soon as it is created, with these permissions. */
   kind?: InvitationKind
   autoPermissions?: Permission[]
+  /** A general link to send to a group: every leader who opens it gets their own account. */
+  reusable?: boolean
 }) {
   const token = randomToken()
   const { error } = await supabase.from("invitations").insert({
@@ -208,6 +234,7 @@ export async function createInvitation(input: {
     role_label: input.roleLabel,
     kind: input.kind ?? "persona",
     auto_permissions: input.kind === "lider" ? (input.autoPermissions ?? []).filter((p) => p !== "usuarios") : [],
+    reusable: Boolean(input.reusable),
     expires_at: new Date(Date.now() + input.days * 86_400_000).toISOString(),
     created_by_name: input.createdByName,
   })
@@ -229,7 +256,7 @@ export const onInvitationsChange = (cb: () => void) => onTableChange("invitation
 /* Public side: the invited person (no session yet)                  */
 /* ---------------------------------------------------------------- */
 
-export type InvitationPreview = { name: string; email: string; phone: string; roleLabel: string; kind: InvitationKind }
+export type InvitationPreview = { name: string; email: string; phone: string; roleLabel: string; kind: InvitationKind; general?: boolean }
 
 export async function readInvitation(token: string): Promise<InvitationPreview> {
   const res = await fetch("/api/registro", {
@@ -255,6 +282,13 @@ export type RegistrationData = {
   password: string
   /** Optional photo as a data URL (already reduced in the browser). */
   photo?: string
+  /** Leaders only: up to 2 of LEADER_ROLES, the ministry they lead ("" = ninguno), events they lead. */
+  roles?: string[]
+  ministry?: string
+  leadsEncuentro?: boolean
+  leadsConvencion?: boolean
+  /** Honeypot (must stay empty). */
+  website?: string
 }
 
 export async function acceptInvitation(data: RegistrationData) {
@@ -265,7 +299,7 @@ export async function acceptInvitation(data: RegistrationData) {
   })
   const body = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(body.error || "No pudimos crear tu cuenta. Inténtalo de nuevo.")
-  return body as { ok: true; username: string; active: boolean }
+  return body as { ok: true; username: string; active: boolean; joinCode?: string }
 }
 
 export const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/

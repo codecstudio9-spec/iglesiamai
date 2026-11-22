@@ -286,6 +286,12 @@ const heroSlides = [
     copy: "Dios nos llamó a abrir esta casa para ti. Ven como estás: juntos vamos a conocer Su amor y a caminar el propósito que Él tiene para tu vida.",
   },
   {
+    src: "/pastor.jpg", position: "75% center", alt: "El pastor de Iglesia MAI predicando ante el podio de cristal",
+    kicker: "Nuestro pastor",
+    title: "Una Palabra viva", accent: "para tu vida.",
+    copy: "Cada domingo nuestro pastor abre la Biblia para enseñarnos a conocer a Dios, vivir Su Palabra y ser guiados por el Espíritu Santo.",
+  },
+  {
     src: "/2.jpg", position: "64% center", alt: "Pastora de Iglesia MAI leyendo la Palabra",
     kicker: "El llamado",
     title: "Dios tiene un propósito", accent: "para tu vida.",

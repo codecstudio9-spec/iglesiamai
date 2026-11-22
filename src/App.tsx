@@ -830,9 +830,9 @@ function HomePage() {
         <div className="vision-top">
           <SectionHeader eyebrow="Nuestra visión" title="Un corazón a la vez." light />
           <p className="vision-intro reveal">
-            Creemos que transformar una ciudad comienza con transformar corazones. Por eso existimos
-            para anunciar a Jesús, formar discípulos, construir familias y extender el Reino de
-            Dios.
+            Somos una iglesia que cree en la extensión del Reino de Dios, que predica el Evangelio de
+            Jesucristo. Anhelamos ver las familias restauradas y transformadas por el poder de Dios,
+            ver ese Avivamiento en nuestra localidad, ciudad y nación.
           </p>
         </div>
         <div className="photo-trio">
@@ -1093,10 +1093,38 @@ function AboutPage() {
         <div className="vision-top">
           <SectionHeader eyebrow="Nuestra visión" title="Un corazón a la vez." light />
           <p className="vision-intro reveal">
-            Creemos que transformar una ciudad comienza con transformar corazones. Por eso existimos
-            para anunciar a Jesús, formar discípulos, construir familias y extender el Reino de
-            Dios.
+            Somos una iglesia que cree en la extensión del Reino de Dios, que predica el Evangelio de
+            Jesucristo. Anhelamos ver las familias restauradas y transformadas por el poder de Dios,
+            ver ese Avivamiento en nuestra localidad, ciudad y nación.
           </p>
+        </div>
+        <div className="vision-top mission-block">
+          <SectionHeader
+            eyebrow="Nuestra misión"
+            title={
+              <>
+                La Gran <em>Comisión.</em>
+              </>
+            }
+            light
+          />
+          <div className="vision-intro mission-copy reveal">
+            <p>Trabajamos para cumplir la Gran Comisión ordenada por Jesús en Mateo 28:19-20:</p>
+            <blockquote>
+              “Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del
+              Padre, y del Hijo, y del Espíritu Santo; enseñándoles que guarden todas las cosas que os
+              he mandado; y he aquí yo estoy con vosotros todos los días, hasta el fin del mundo.
+              Amén.”
+              <cite>Mateo 28:19-20</cite>
+            </blockquote>
+            <p>
+              De manera que predicamos la Palabra de Dios y formamos discípulos en las enseñanzas
+              bíblicas fundamentales, mediante la oración, el discipulado y los Hogares de
+              Avivamiento, con el propósito de levantar hombres y mujeres que amen y vivan para Dios y
+              sean guiados por el Espíritu Santo. Somos una familia en Cristo que acompaña y sirve con
+              amor.
+            </p>
+          </div>
         </div>
         <Pillars />
       </section>

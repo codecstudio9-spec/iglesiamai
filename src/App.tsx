@@ -370,6 +370,7 @@ function PageHero({
   position = "center",
   crumb,
   video,
+  photo = true,
 }: {
   eyebrow: string
   title: string
@@ -380,6 +381,8 @@ function PageHero({
   crumb: string
   /** A moving backdrop instead of the blurred photo. */
   video?: typeof sermonVideo
+  /** Framed photo on the right; off where the backdrop already says enough. */
+  photo?: boolean
 }) {
   return (
     <section className="page-hero">
@@ -408,9 +411,11 @@ function PageHero({
           </h1>
           <p className="hero-copy">{intro}</p>
         </div>
-        <figure className="page-hero-photo">
-          <img src={image} alt={`${crumb} · Iglesia MAI`} />
-        </figure>
+        {photo && (
+          <figure className="page-hero-photo">
+            <img src={image} alt={`${crumb} · Iglesia MAI`} />
+          </figure>
+        )}
       </div>
     </section>
   )
@@ -570,15 +575,14 @@ function CTA({ image = photos.hero }: { image?: string }) {
 
 function Pillars() {
   const pillars = [
-    ["01", "Conocer a Dios", "Una relación real y personal con Jesús."],
-    ["02", "Crecer juntos", "Una familia donde nadie camina solo."],
-    ["03", "Vivir el propósito", "Una vida que impacta a otros."],
+    ["Conocer a Dios", "Una relación real y personal con Jesús."],
+    ["Crecer juntos", "Una familia donde nadie camina solo."],
+    ["Vivir el propósito", "Una vida que impacta a otros."],
   ]
   return (
     <div className="pillars">
-      {pillars.map(([number, title, text]) => (
-        <article className="pillar reveal" key={number}>
-          <span>{number}</span>
+      {pillars.map(([title, text]) => (
+        <article className="pillar reveal" key={title}>
           <h3>{title}</h3>
           <p>{text}</p>
         </article>
@@ -1405,6 +1409,7 @@ function MessagesPage() {
         image={preaching[0]}
         position="center 25%"
         video={sermonVideo}
+        photo={false}
       />
 
       <section className="messages section-pad">
